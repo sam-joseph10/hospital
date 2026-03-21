@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Patient Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* EXACT SAME STYLES AS THE ORIGINAL DEPARTMENT PATIENTS PAGE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 90rem;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: clamp(1.5rem, 4vw, 1.875rem);
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+
+        .hospital-badge {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .hospital-badge i {
+            font-size: 1rem;
+        }
+
+        /* Page Container */
+        .page-container {
+            max-width: 90rem;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 700;
+            color: #0c2647;
+            line-height: 1.2;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 0.5rem;
+        }
+
+        .dept-info-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: white;
+            padding: 0.6rem 1.8rem;
+            border-radius: 100px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
+        }
+
+        .dept-info-bar i {
+            color: #4f46e5;
+        }
+
+        .dept-info-bar span {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 2.2rem;
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+            border-radius: 100px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .back-link:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+            font-size: 1rem;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-wrapper input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-stats {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .clear-search {
+            color: #4f46e5;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            transition: all 0.2s;
+        }
+
+        .clear-search:hover {
+            background: #eef2ff;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Inter', sans-serif;
+            min-width: 800px; /* extra column */
+        }
+
+        th {
+            text-align: left;
+            padding: 1.2rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            background: #f8fafc;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .patient-type {
+            display: inline-block;
+            padding: 0.25rem 0.9rem;
+            background: #eef2ff;
+            color: #4f46e5;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-cured {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-not-cured {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-dead {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .status-shifted {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .edit-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            background: #e6f0ff;
+            color: #2563eb;
+        }
+
+        .edit-btn:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* Modal Styles (same as before) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 2rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlide 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            padding: 2rem 2rem 1.5rem;
+            border-radius: 2rem 2rem 0 0;
+            position: relative;
+            color: white;
+        }
+
+        .modal-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label i {
+            color: #2563eb;
+            margin-right: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid #d0e2ff;
+            border-radius: 60px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fcff;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+            background: white;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+        }
+
+        textarea.form-control {
+            border-radius: 1rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid #eef4ff;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 2px solid #d0e2ff;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #4a6a97;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fcff;
+            border-color: #2563eb;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 16px -6px #2563eb80;
+        }
+
+        .btn-primary:hover {
+            background: #1e4f9c;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">MedTrack</div>
+            <div class="hospital-badge" id="hospitalBadge">
+                <i class="fas fa-hospital"></i>
+                <span id="hospitalName">{{ hospital_name }}</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="page-container">
+        <!-- Header with Back Link -->
+        <div class="page-header">
+            <div class="header-left">
+                <h1 id="pageTitle">
+                    <i class="fas fa-users"></i> 
+                    Patient Management
+                </h1>
+                <div class="dept-info-bar" id="deptInfoBar">
+                    <i class="fas fa-users"></i>
+                    <span id="patientCount">0</span>Patients
+                    <i class="fas fa-check-circle" style="color:#15803d;"></i>
+                    <span id="curedCount">0</span>Cured
+                </div>
+            </div>
+            <a href="#" class="back-link" onclick="history.back(); return false;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by ID, name, doctor, diagnosis, status..." onkeyup="filterPatients()">
+            </div>
+            <div class="search-stats">
+                <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalCount">0</strong> patients</span>
+                <button class="clear-search" onclick="clearSearch()">Clear Search</button>
+            </div>
+        </div>
+
+        <!-- Patients Table -->
+        <div class="table-container">
+            <table id="patientTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Joined</th>
+                        <th>Discharge</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="9" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading patients...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="patientModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Patient</h2>
+                <p>Update patient details</p>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="patientForm" onsubmit="savePatient(event)">
+                    <input type="hidden" id="patientId" value="">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Patient ID *</label>
+                            <input type="text" class="form-control" id="patientIdField" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="patientName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Gender *</label>
+                            <select class="form-control" id="patientGender" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="patientDob">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="patientPhone">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Doctor *</label>
+                            <select class="form-control" id="patientDoctor" required>
+                                <option value="">Select doctor</option>
+                                {% for doc in doctors %}
+                                    <option value="{{ doc.id }}">{{ doc.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Department *</label>
+                            <select class="form-control" id="patientDepartment" required>
+                                <option value="">Select department</option>
+                                {% for dept in departments %}
+                                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Visit Date *</label>
+                            <input type="date" class="form-control" id="patientVisitDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Discharge Date</label>
+                            <input type="date" class="form-control" id="patientDischargeDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Diagnosis *</label>
+                        <input type="text" class="form-control" id="patientDiagnosis" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="patientNotes" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status *</label>
+                        <select class="form-control" id="patientStatus" required>
+                            <option value="">Select</option>
+                            <option value="cured">Cured</option>
+                            <option value="dead">Deceased</option>
+                            <option value="shifted">Shifted</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass data from Django -->
+    {{ patients_json|json_script:"patients-data" }}
+    <script>
+        // ==================== LOAD DATA ====================
+        let allPatients = [];
+        try {
+            const raw = document.getElementById('patients-data').textContent;
+            allPatients = JSON.parse(raw);
+            console.log(`✅ Loaded ${allPatients.length} patients`);
+        } catch (e) {
+            console.error('Failed to parse patients data', e);
+            allPatients = [];
+        }
+
+        let currentPatients = [...allPatients];
+
+        // DOM elements
+        const tbody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+        const visibleSpan = document.getElementById('visibleCount');
+        const totalSpan = document.getElementById('totalCount');
+        const patientCountSpan = document.getElementById('patientCount');
+        const curedCountSpan = document.getElementById('curedCount');
+
+        // ==================== RENDER TABLE ====================
+        function renderTable(patientsList) {
+            totalSpan.textContent = allPatients.length;
+            visibleSpan.textContent = patientsList.length;
+            patientCountSpan.textContent = patientsList.length;
+            curedCountSpan.textContent = patientsList.filter(p => p.status === 'cured').length;
+
+            if (patientsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <i class="fas fa-user-slash"></i>
+                            <p>No matching patients found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            patientsList.forEach(p => {
+                let statusClass = '';
+                let statusText = '';
+
+                if (p.status === 'cured') {
+                    statusClass = 'status-cured';
+                    statusText = 'Cured';
+                } else if (p.status === 'dead') {
+                    statusClass = 'status-dead';
+                    statusText = 'Deceased';
+                } else if (p.status === 'shifted') {
+                    statusClass = 'status-shifted';
+                    statusText = 'Shifted';
+                } else {
+                    statusClass = 'status-not-cured';
+                    statusText = 'Not cured';
+                }
+
+                html += `
+                    <tr>
+                        <td><span style="font-family: monospace; font-weight:600;">${p.patient_id}</span></td>
+                        <td>${p.name}</td>
+                        <td>${p.gender || '—'}</td>
+                        <td>${p.doctor_name || '—'}</td>
+                        <td>${p.diagnosis}</td>
+                        <td>${p.visit_date}</td>
+                        <td>${p.discharge_date || '—'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="edit-btn" onclick="editPatient(${p.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ==================== SEARCH ====================
+        function filterPatients() {
+            const term = searchInput.value.toLowerCase().trim();
+            if (!term) {
+                currentPatients = [...allPatients];
+            } else {
+                currentPatients = allPatients.filter(p =>
+                    (p.patient_id && p.patient_id.toLowerCase().includes(term)) ||
+                    (p.name && p.name.toLowerCase().includes(term)) ||
+                    (p.doctor_name && p.doctor_name.toLowerCase().includes(term)) ||
+                    (p.diagnosis && p.diagnosis.toLowerCase().includes(term)) ||
+                    (p.status && p.status.toLowerCase().includes(term))
+                );
+            }
+            renderTable(currentPatients);
+        }
+
+        function clearSearch() {
+            searchInput.value = '';
+            filterPatients();
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        const modal = document.getElementById('patientModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const patientId = document.getElementById('patientId');
+        const patientIdField = document.getElementById('patientIdField');
+        const patientName = document.getElementById('patientName');
+        const patientGender = document.getElementById('patientGender');
+        const patientDob = document.getElementById('patientDob');
+        const patientPhone = document.getElementById('patientPhone');
+        const patientDoctor = document.getElementById('patientDoctor');
+        const patientDepartment = document.getElementById('patientDepartment');
+        const patientVisitDate = document.getElementById('patientVisitDate');
+        const patientDiagnosis = document.getElementById('patientDiagnosis');
+        const patientNotes = document.getElementById('patientNotes');
+        const patientStatus = document.getElementById('patientStatus');
+        const patientDischargeDate = document.getElementById('patientDischargeDate');
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        window.editPatient = function(id) {
+            const patient = allPatients.find(p => p.id === id);
+            if (!patient) return;
+
+            modalTitle.textContent = 'Edit Patient';
+            patientId.value = patient.id;
+            patientIdField.value = patient.patient_id || '';
+            patientName.value = patient.name || '';
+            patientGender.value = patient.gender || '';
+            patientDob.value = patient.date_of_birth || '';
+            patientPhone.value = patient.phone || '';
+            patientDoctor.value = patient.doctor_id || '';
+            patientDepartment.value = patient.department_id || '';
+            patientVisitDate.value = patient.visit_date || '';
+            patientDiagnosis.value = patient.diagnosis || '';
+            patientNotes.value = patient.notes || '';
+            patientStatus.value = patient.status || '';
+            patientDischargeDate.value = patient.discharge_date || '';
+            modal.classList.add('active');
+        };
+
+        // CSRF token
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // ==================== SAVE PATIENT ====================
+        window.savePatient = async function(event) {
+            event.preventDefault();
+
+            const id = patientId.value;
+            const payload = {
+                patient_id: patientIdField.value.trim(),
+                name: patientName.value.trim(),
+                gender: patientGender.value,
+                date_of_birth: patientDob.value || null,
+                phone: patientPhone.value.trim(),
+                doctor_id: patientDoctor.value,
+                department_id: patientDepartment.value,
+                visit_date: patientVisitDate.value,
+                diagnosis: patientDiagnosis.value.trim(),
+                notes: patientNotes.value.trim(),
+                status: patientStatus.value,
+                discharge_date: patientDischargeDate.value || null,
+            };
+
+            if (!payload.patient_id || !payload.name || !payload.gender || !payload.doctor_id || !payload.department_id || !payload.visit_date || !payload.diagnosis || !payload.status) {
+                alert('Please fill all required fields.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/viewer/patients/${id}/edit/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const index = allPatients.findIndex(p => p.id === id);
+                    if (index !== -1) allPatients[index] = data.patient;
+                    filterPatients();
+                    location.reload();
+                    closeModal();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to save patient');
+            }
+        };
+
+        // Close modal on outside click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+
+        // Initial render
+        renderTable(allPatients);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Department Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+            overflow-x: hidden;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION – MATCHING DASHBOARD STYLE ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1e3a8a;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 180px;
+            border-radius: 16px;
+            box-shadow: 0 20px 35px -10px rgba(18, 52, 106, 0.3);
+            border: 1px solid #e0ecff;
+            z-index: 100;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content:hover {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            background: transparent;
+        }
+
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .dropdown-content a i {
+            width: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown:hover .dropdown-trigger i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.4rem 1.2rem 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d9e6ff;
+            box-shadow: 0 3px 10px rgba(0,35,70,0.05);
+            font-weight: 500;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .hospital-selector i {
+            color: #2563eb;
+            font-size: 1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Page Container - Responsive */
+        .page-container {
+            max-width: 90rem;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .page-container {
+                padding: 0 1.5rem;
+                margin: 1.5rem auto;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .page-container {
+                padding: 0 2rem;
+                margin: 2rem auto;
+            }
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                margin-bottom: 2rem;
+            }
+        }
+
+        .header-left h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            font-weight: 700;
+            color: #0c2647;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-left h1 i {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 0.5rem;
+        }
+
+        .header-left p {
+            color: #64748b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+            border-radius: 100px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .back-link {
+                padding: 0.75rem 2rem;
+                font-size: 0.9rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        .back-link:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        /* Add Department Section */
+        .add-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        @media (min-width: 768px) {
+            .add-section {
+                padding: 1.5rem;
+                border-radius: 1.2rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .add-section .form-group {
+            flex: 2;
+            min-width: 250px;
+        }
+
+        .add-section label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .add-section select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        @media (min-width: 768px) {
+            .add-section select {
+                padding: 0.9rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .add-section select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: white;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        @media (min-width: 768px) {
+            .btn {
+                padding: 0.9rem 2rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: white;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats-info {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .stat-box {
+                padding: 0.5rem 1.2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .stat-box i {
+            color: #4f46e5;
+            margin-right: 0.3rem;
+        }
+
+        .stat-box span {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 220px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 0.8rem 0.5rem 2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            outline: none;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        @media (min-width: 768px) {
+            .search-box input {
+                padding: 0.6rem 1rem 0.6rem 2.2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .search-box input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Departments Grid */
+        .departments-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 480px) {
+            .departments-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .departments-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .departments-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        .department-card {
+            background: white;
+            border-radius: 0.8rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        @media (min-width: 768px) {
+            .department-card {
+                padding: 1.2rem;
+                border-radius: 1rem;
+            }
+        }
+
+        .department-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
+            border-color: #c7d2fe;
+        }
+
+        .dept-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex: 1;
+        }
+
+        .dept-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #eef2ff, #e6f0ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4f46e5;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        @media (min-width: 768px) {
+            .dept-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+                border-radius: 16px;
+            }
+        }
+
+        .department-card:hover .dept-icon {
+            transform: scale(1.05);
+        }
+
+        .dept-details h4 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+        }
+
+        @media (min-width: 768px) {
+            .dept-details h4 {
+                font-size: 1rem;
+            }
+        }
+
+        .dept-details p {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        @media (min-width: 768px) {
+            .dept-details p {
+                font-size: 0.75rem;
+            }
+        }
+
+        .dept-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dept-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        @media (min-width: 768px) {
+            .dept-action-btn {
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        .dept-action-btn.remove {
+            color: #b91c1c;
+        }
+
+        .dept-action-btn.remove:hover {
+            background: #fee2e2;
+        }
+
+        .dept-action-btn.edit {
+            color: #4f46e5;
+        }
+
+        .dept-action-btn.edit:hover {
+            background: #eef2ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
+
+        /* Responsive Navigation Adjustments */
+        @media (max-width: 900px) {
+            .navbar-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+                padding: 0.8rem 1.5rem;
+            }
+            .nav-right {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .nav-links {
+                flex: 1;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .logo {
+                font-size: 1.4rem;
+                white-space: nowrap;
+            }
+            .nav-right {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                width: auto;
+                justify-content: flex-end;
+            }
+            .nav-links {
+                flex: none;
+                width: auto;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                margin: 0;
+            }
+            .dropdown-content {
+                right: 0;
+                left: auto;
+                min-width: 160px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .back-link {
+                width: 100%;
+                justify-content: center;
+            }
+            .add-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .add-section .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .stats-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .department-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+            .dept-actions {
+                align-self: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-container {
+                padding: 0.5rem 0.8rem;
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            .dropdown-content {
+                min-width: 140px;
+            }
+            .page-container {
+                padding: 0 1rem;
+            }
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+            .dept-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            .dept-details h4 {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION - MATCHING DASHBOARD STYLE ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'viewer_dashboard' %}" class="logo">MedTrack</a>
+            
+            <div class="nav-right">
+                <div class="nav-links">
+                    <div class="dropdown">
+                        <div class="dropdown-trigger nav-item">
+                            <div class="hospital-selector">
+                                <i class="fas fa-hospital"></i>
+                                <span>{{ hospital_name|default:"Department Management" }}</span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-header">
+            <div class="header-left">
+                <h1><i class="fas fa-stethoscope"></i> Department Management</h1>
+                <p><i class="fas fa-sliders-h"></i> Add, remove, and manage hospital departments</p>
+            </div>
+            <a href="#" class="back-link" onclick="history.back(); return false;">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Add Department Section -->
+        <div class="add-section">
+            <div class="form-group">
+                <label><i class="fas fa-plus-circle"></i> Add New Department</label>
+                <select id="departmentSelect">
+                    <option value="">-- Select a department to add --</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="addDepartment()">
+                <i class="fas fa-plus"></i> Add Department
+            </button>
+        </div>
+
+        <!-- Stats and Search -->
+        <div class="stats-row">
+            <div class="stats-info">
+                <div class="stat-box">
+                    <i class="fas fa-stethoscope"></i>
+                    <span id="totalDepts">0</span> Total Departments
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-check-circle" style="color:#15803d;"></i>
+                    <span id="activeDepts">0</span> Active
+                </div>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search departments..." onkeyup="searchDepartments()">
+            </div>
+        </div>
+
+        <!-- Departments Grid -->
+        <div class="departments-grid" id="departmentsGrid">
+            <!-- Departments will be populated here -->
+        </div>
+    </div>
+
+    <!-- Pass initial data from Django -->
+    {{ departments_json|json_script:"departments-data" }}
+
+    <script>
+        // ========== MASTER DEPARTMENT LIST ==========
+        const masterDepartments = [
+            "Anaesthesiology", "Bariatrics", "Biochemistry", "Blood Bank", "Cardiology",
+            "Cardiothoracic Surgery", "Cosmetology", "Critical Care (ICU)", "Dentistry",
+            "Dermatology", "Dietetics & Nutrition", "Emergency Medicine",
+            "Endocrinology & Diabetes Care", "ENT (Ear, Nose & Throat)", "Family Medicine",
+            "Gastroenterology & Hepatology", "General Medicine", "General Surgery",
+            "Genetics", "Geriatrics", "Infectious Diseases", "Internal Medicine",
+            "Microbiology", "Neonatology", "Nephrology", "Neurology", "Neurosurgery",
+            "Nuclear Medicine", "Obstetrics & Gynecology", "Oncology", "Ophthalmology",
+            "Orthopedics", "Pain & Rehabilitation Medicine", "Palliative Care",
+            "Pathology", "Pediatrics", "Physiotherapy", "Plastic & Reconstructive Surgery",
+            "Psychiatry", "Psychology", "Pulmonology", "Radiology & Imaging",
+            "Reproductive Medicine / IVF", "Rheumatology & Immunology", "Speech Therapy",
+            "Occupational Therapy", "Transplant Medicine", "Urology", "Vascular Surgery"
+        ];
+
+        // Department icon mapping
+        const departmentIcons = {
+            "Cardiology": "❤️", "Neurology": "🧠", "Orthopedics": "🦴", "Pediatrics": "🧸",
+            "Oncology": "🎗️", "Radiology & Imaging": "📡", "Emergency Medicine": "🚑",
+            "Critical Care (ICU)": "🆘", "Dermatology": "🧴", "Gastroenterology": "🫁",
+            "Pulmonology": "🫁", "Urology": "🧂", "Ophthalmology": "👁️", "ENT": "👂",
+            "Obstetrics & Gynecology": "🤰", "Psychiatry": "🧘", "Nephrology": "🫘",
+            "Endocrinology": "⚡", "General Medicine": "🏥", "General Surgery": "🔪",
+            "Neurosurgery": "🧠", "Plastic Surgery": "🦋", "Transplant Medicine": "🔄",
+            "Pathology": "🔍", "Microbiology": "🔬", "Biochemistry": "🧪", "Blood Bank": "🩸",
+            "Physiotherapy": "🏃", "Speech Therapy": "🗣️", "Occupational Therapy": "✍️",
+            "Pain & Rehabilitation Medicine": "💆", "Palliative Care": "🕊️",
+            "Genetics": "🧬", "Geriatrics": "👴", "Infectious Diseases": "🦠",
+            "Internal Medicine": "💊", "Neonatology": "👶", "Nuclear Medicine": "☢️",
+            "Reproductive Medicine / IVF": "🥚", "Vascular Surgery": "🩸",
+            "Anaesthesiology": "💉", "Bariatrics": "⚖️", "Cardiothoracic Surgery": "🫀",
+            "Dentistry": "🦷", "Dietetics & Nutrition": "🥗", "Family Medicine": "👪",
+            "Psychology": "💭", "Rheumatology & Immunology": "🤲", "default": "🏥"
+        };
+
+        // Gradient colors based on department category
+        function getGradientColors(deptName) {
+            const surgical = ["Anaesthesiology", "Bariatrics", "Cardiothoracic Surgery", "Dentistry", "General Surgery", "Neurosurgery", "Obstetrics", "Gynecology", "Ophthalmology", "Orthopedics", "Plastic Surgery", "Transplant Medicine", "Urology", "Vascular Surgery", "ENT"];
+            const medical = ["Cardiology", "Dermatology", "Endocrinology", "Family Medicine", "Gastroenterology", "General Medicine", "Geriatrics", "Infectious Diseases", "Internal Medicine", "Nephrology", "Neurology", "Oncology", "Pulmonology", "Rheumatology"];
+            const diagnostic = ["Biochemistry", "Blood Bank", "Genetics", "Microbiology", "Nuclear Medicine", "Pathology", "Radiology"];
+            const pediatric = ["Neonatology", "Pediatrics"];
+            const emergency = ["Critical Care", "Emergency Medicine"];
+            
+            if (surgical.some(s => deptName.includes(s))) return { start: "#fee8e8", end: "#fcc7c7" };
+            if (medical.some(m => deptName.includes(m))) return { start: "#e8f0fe", end: "#b8d1fc" };
+            if (diagnostic.some(d => deptName.includes(d))) return { start: "#e0f2f1", end: "#b2dfdb" };
+            if (pediatric.some(p => deptName.includes(p))) return { start: "#fff9c4", end: "#fff59d" };
+            if (emergency.some(e => deptName.includes(e))) return { start: "#ffebee", end: "#ffcdd2" };
+            return { start: "#eef2ff", end: "#e6f0ff" };
+        }
+
+        // ========== LOAD EXISTING DEPARTMENTS ==========
+        let allDepartments = [];
+        try {
+            const raw = document.getElementById('departments-data').textContent;
+            allDepartments = JSON.parse(raw);
+            console.log(`✅ Loaded ${allDepartments.length} departments from DB`);
+        } catch (e) {
+            console.error('Failed to parse departments data', e);
+            allDepartments = [];
+        }
+
+        allDepartments.sort((a, b) => a.name.localeCompare(b.name));
+
+        const select = document.getElementById('departmentSelect');
+        const grid = document.getElementById('departmentsGrid');
+        const totalSpan = document.getElementById('totalDepts');
+        const activeSpan = document.getElementById('activeDepts');
+        const searchInput = document.getElementById('searchInput');
+
+        // Populate dropdown
+        function populateDropdown() {
+            const existingNames = allDepartments.map(d => d.name);
+            const available = masterDepartments.filter(name => !existingNames.includes(name));
+            available.sort();
+
+            select.innerHTML = '<option value="">-- Select a department to add --</option>';
+            available.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+        }
+
+        // Get icon for department
+        function getDepartmentIcon(deptName) {
+            return departmentIcons[deptName] || departmentIcons.default;
+        }
+
+        // Render departments grid
+        function renderDepartments(filtered) {
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No departments found</p>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                filtered.forEach(dept => {
+                    const icon = getDepartmentIcon(dept.name);
+                    const colors = getGradientColors(dept.name);
+                    html += `
+                        <div class="department-card" data-id="${dept.id}">
+                            <div class="dept-info">
+                                <div class="dept-icon" style="background: linear-gradient(135deg, ${colors.start}, ${colors.end});">
+                                    <span style="font-size: 1.2rem;">${icon}</span>
+                                </div>
+                                <div class="dept-details">
+                                    <h4>${dept.name}</h4>
+                                    <p>${dept.doctor_count || 0} doctors • ${dept.patient_count || 0} patient visits</p>
+                                </div>
+                            </div>
+                            <div class="dept-actions">
+                                <button class="dept-action-btn edit" onclick="editDepartment(${dept.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="dept-action-btn remove" onclick="deleteDepartment(${dept.id})" title="Remove">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                grid.innerHTML = html;
+            }
+            totalSpan.textContent = allDepartments.length;
+            activeSpan.textContent = allDepartments.length;
+        }
+
+        // Search departments
+        function searchDepartments() {
+            const term = searchInput.value.toLowerCase().trim();
+            const filtered = allDepartments.filter(d => d.name.toLowerCase().includes(term));
+            renderDepartments(filtered);
+        }
+
+        // CSRF token
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Add department
+        window.addDepartment = async function() {
+            const name = select.value;
+            if (!name) {
+                alert('Please select a department');
+                return;
+            }
+
+            try {
+                const response = await fetch('/departments/add/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ name })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    allDepartments.push(data.department);
+                    allDepartments.sort((a, b) => a.name.localeCompare(b.name));
+                    populateDropdown();
+                    searchDepartments();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to add department');
+            }
+        };
+
+        // Edit department
+        window.editDepartment = function(id) {
+            const dept = allDepartments.find(d => d.id === id);
+            if (!dept) return;
+
+            const newName = prompt('Edit department name:', dept.name);
+            if (!newName) return;
+            const trimmed = newName.trim();
+            if (!trimmed) {
+                alert('Department name cannot be empty');
+                return;
+            }
+
+            fetch(`/departments/${id}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ name: trimmed })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const index = allDepartments.findIndex(d => d.id === id);
+                    allDepartments[index] = data.department;
+                    allDepartments.sort((a, b) => a.name.localeCompare(b.name));
+                    populateDropdown();
+                    searchDepartments();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Failed to edit department');
+            });
+        };
+
+        // Delete department
+        window.deleteDepartment = function(id) {
+            if (!confirm('Are you sure you want to remove this department?')) return;
+
+            fetch(`/departments/${id}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    allDepartments = allDepartments.filter(d => d.id !== id);
+                    populateDropdown();
+                    searchDepartments();
+                } else {
+                    alert('Error deleting department');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Failed to delete department');
+            });
+        };
+
+        // Expose functions globally
+        window.searchDepartments = searchDepartments;
+        window.addDepartment = addDepartment;
+        window.editDepartment = editDepartment;
+        window.deleteDepartment = deleteDepartment;
+
+        // Initialize
+        populateDropdown();
+        renderDepartments(allDepartments);
+    </script>
+</body>
+</html>

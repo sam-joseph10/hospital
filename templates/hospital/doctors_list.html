@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Doctors Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f4f9ff 0%, #eaf2fd 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION – MATCHING DASHBOARD STYLE ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1e3a8a;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 180px;
+            border-radius: 16px;
+            box-shadow: 0 20px 35px -10px rgba(18, 52, 106, 0.3);
+            border: 1px solid #e0ecff;
+            z-index: 100;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content:hover {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            background: transparent;
+        }
+
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .dropdown-content a i {
+            width: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown:hover .dropdown-trigger i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.4rem 1.2rem 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d9e6ff;
+            box-shadow: 0 3px 10px rgba(0,35,70,0.05);
+            font-weight: 500;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .hospital-selector i {
+            color: #2563eb;
+            font-size: 1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Page Container - Responsive */
+        .page-container {
+            max-width: 90rem;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .page-container {
+                padding: 0 1.5rem;
+                margin: 1.5rem auto;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .page-container {
+                padding: 0 2rem;
+                margin: 2rem auto;
+            }
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                align-items: center;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .header-left h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            font-weight: 700;
+            color: #0c2647;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-left p {
+            color: #3b5f8a;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .header-left p {
+                font-size: 0.9rem;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .back-link {
+                padding: 0.6rem 1.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .back-link:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: linear-gradient(135deg, #2563eb, #1e4f9c);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s;
+        }
+
+        @media (min-width: 768px) {
+            .add-btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .add-btn:hover {
+            background: linear-gradient(135deg, #1e4f9c, #153b73);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Search Section */
+        .search-section {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            background: white;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        @media (min-width: 768px) {
+            .search-wrapper input {
+                padding: 0.9rem 1.5rem 0.9rem 3rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .search-wrapper input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .clear-btn:hover {
+            background: #eef2ff;
+        }
+
+        .results-count {
+            color: #4a6a97;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(18, 52, 106, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .table-card {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .table-card {
+                padding: 1.8rem;
+                border-radius: 2rem;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Inter', sans-serif;
+            min-width: 800px;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.8rem 0.8rem;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        @media (min-width: 768px) {
+            th {
+                padding: 1rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            th {
+                padding: 1.2rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        td {
+            padding: 0.8rem 0.8rem;
+            border-bottom: 1px solid #eef4ff;
+            color: #1e2f4a;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            td {
+                padding: 1rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            td {
+                padding: 1rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        tr:hover td {
+            background: #f9fdff;
+        }
+
+        .department-badge {
+            background: #eef2ff;
+            border-radius: 40px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4f46e5;
+            display: inline-block;
+        }
+
+        @media (min-width: 768px) {
+            .department-badge {
+                padding: 0.3rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .edit-btn, .delete-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .edit-btn, .delete-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .edit-btn {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .edit-btn:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6f8fbc;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 650px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlide 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                border-radius: 2rem;
+            }
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            padding: 1.5rem 1.5rem 1rem;
+            border-radius: 1.5rem 1.5rem 0 0;
+            position: relative;
+            color: white;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header {
+                padding: 2rem 2rem 1.5rem;
+            }
+        }
+
+        .modal-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .modal-header p {
+            opacity: 0.9;
+            font-size: 0.8rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 1.2rem;
+            max-height: calc(90vh - 120px);
+            overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+            .modal-body {
+                padding: 2rem;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1e293b;
+            margin-bottom: 0.3rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-label {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .form-label i {
+            color: #2563eb;
+            margin-right: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.7rem 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        @media (min-width: 768px) {
+            .form-control {
+                padding: 0.9rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .form-control:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: white;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 0.8rem;
+        }
+
+        textarea.form-control {
+            border-radius: 1rem;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        @media (min-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid #eef4ff;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: #4a6a97;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .btn-secondary {
+                padding: 0.8rem 2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .btn-primary {
+                padding: 0.8rem 2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4338ca, #1e4f9c);
+            transform: translateY(-2px);
+        }
+
+        h4 {
+            font-size: 0.9rem;
+            margin: 1rem 0 0.5rem;
+            color: #1e293b;
+        }
+
+        /* Responsive Navigation Adjustments */
+        @media (max-width: 900px) {
+            .navbar-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+                padding: 0.8rem 1.5rem;
+            }
+            .nav-right {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .nav-links {
+                flex: 1;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .logo {
+                font-size: 1.4rem;
+                white-space: nowrap;
+            }
+            .nav-right {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                width: auto;
+                justify-content: flex-end;
+            }
+            .nav-links {
+                flex: none;
+                width: auto;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                margin: 0;
+            }
+            .dropdown-content {
+                right: 0;
+                left: auto;
+                min-width: 160px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-actions {
+                width: 100%;
+            }
+            .back-link, .add-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-container {
+                padding: 0.5rem 0.8rem;
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            .dropdown-content {
+                min-width: 140px;
+            }
+            .dropdown-content a {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            .search-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper {
+                width: 100%;
+            }
+            .results-count {
+                text-align: center;
+            }
+            .action-btns {
+                flex-direction: row;
+                justify-content: center;
+            }
+            .modal {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION - MATCHING DASHBOARD STYLE ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'viewer_dashboard' %}" class="logo">MedTrack</a>
+            
+            <div class="nav-right">
+                <div class="nav-links">
+                    <div class="dropdown">
+                        <div class="dropdown-trigger nav-item">
+                            <div class="hospital-selector">
+                                <i class="fas fa-hospital"></i>
+                                <span>{{ hospital_name }}</span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== DOCTOR MANAGEMENT PAGE ===== -->
+    <div class="page-container">
+        <div class="page-header">
+            <div class="header-left">
+                <h1>Doctors Directory</h1>
+                <p><i class="fas fa-stethoscope" style="color:#2563eb;"></i> Manage all doctors across hospitals</p>
+            </div>
+            <div class="header-actions">
+                <a href="#" class="back-link" onclick="history.back(); return false;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button class="add-btn" onclick="openAddModal()">
+                    <i class="fas fa-plus-circle"></i> Add Doctor
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-section">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="doctorSearch" placeholder="Search by name, ID, gender, specialization, department..." onkeyup="filterDoctors()">
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <span class="results-count">Showing <span id="visibleCount">0</span> of <span id="totalCount">0</span> doctors</span>
+                <button class="clear-btn" onclick="clearSearch()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- Doctors Table -->
+        <div class="table-card">
+            <table id="doctorsTable">
+                <thead>
+                    <tr>
+                        <th>Doctor ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Specialization</th>
+                        <th>Department</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- rows inserted by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="doctorModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Doctor</h2>
+                <p>Fill in the doctor details</p>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="doctorForm" onsubmit="saveDoctor(event)">
+                    <input type="hidden" id="doctorId" value="">
+
+                    <!-- Basic Information -->
+                    <h4 style="margin-bottom: 0.5rem; color: #1e293b;"><i class="fas fa-user-md"></i> Basic Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Doctor ID (optional)</label>
+                            <input type="text" class="form-control" id="doctorIdField" placeholder="e.g. DOC001">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="doctorName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Gender *</label>
+                            <select class="form-control" id="doctorGender" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="doctorDob">
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <h4 style="margin: 1rem 0 0.5rem;"><i class="fas fa-address-card"></i> Contact</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="doctorEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone *</label>
+                            <input type="text" class="form-control" id="doctorPhone" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" id="doctorAddress" rows="2"></textarea>
+                    </div>
+
+                    <!-- Professional Details -->
+                    <h4 style="margin: 1rem 0 0.5rem;"><i class="fas fa-briefcase"></i> Professional</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Specialization *</label>
+                            <input type="text" class="form-control" id="doctorSpecialization" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Qualification</label>
+                            <input type="text" class="form-control" id="doctorQualification" placeholder="MBBS, MD">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Registration Number</label>
+                            <input type="text" class="form-control" id="doctorRegNo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Experience (years)</label>
+                            <input type="number" class="form-control" id="doctorExperience" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Hospital</label>
+                        <input type="text" class="form-control" id="doctorPreviousHospital">
+                    </div>
+
+                    <!-- Work Details -->
+                    <h4 style="margin: 1rem 0 0.5rem;"><i class="fas fa-clock"></i> Work</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Department *</label>
+                            <select class="form-control" id="doctorDepartment" required>
+                                <option value="">Select department</option>
+                                {% for dept in departments %}
+                                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Designation</label>
+                            <input type="text" class="form-control" id="doctorDesignation" placeholder="Consultant">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Joining Date</label>
+                            <input type="date" class="form-control" id="doctorJoiningDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Working Days</label>
+                            <input type="text" class="form-control" id="doctorWorkingDays" placeholder="Mon-Fri">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Doctor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass initial data from Django -->
+    {{ doctors_json|json_script:"doctors-data" }}
+
+    <script>
+        // ========== LOAD INITIAL DATA ==========
+        let allDoctors = [];
+        try {
+            const raw = document.getElementById('doctors-data').textContent;
+            allDoctors = JSON.parse(raw);
+            console.log(`✅ Loaded ${allDoctors.length} doctors`);
+        } catch (e) {
+            console.error('Failed to parse doctors data', e);
+            allDoctors = [];
+        }
+
+        // Store current filtered list
+        let currentDoctors = [...allDoctors];
+
+        // DOM elements
+        const tbody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('doctorSearch');
+        const visibleSpan = document.getElementById('visibleCount');
+        const totalSpan = document.getElementById('totalCount');
+
+        // ========== RENDER TABLE ==========
+        function renderDoctors(doctors) {
+            totalSpan.textContent = allDoctors.length;
+            visibleSpan.textContent = doctors.length;
+
+            if (doctors.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No doctors match your search</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            doctors.forEach(doc => {
+                html += `<tr>
+                    <td><span style="font-family: monospace; font-weight:600;">${doc.display_id}</span></td>
+                    <td>${doc.name}</td>
+                    <td>${doc.gender}</td>
+                    <td>${doc.specialization}</td>
+                    <td><span class="department-badge">${doc.department_name}</span></td>
+                    <td>${doc.email}</td>
+                    <td>${doc.phone}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="edit-btn" onclick="editDoctor(${doc.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="delete-btn" onclick="deleteDoctor(${doc.id})" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ========== FILTER FUNCTION ==========
+        function filterDoctors() {
+            const term = searchInput.value.toLowerCase().trim();
+            if (!term) {
+                currentDoctors = [...allDoctors];
+            } else {
+                currentDoctors = allDoctors.filter(doc =>
+                    (doc.display_id && doc.display_id.toLowerCase().includes(term)) ||
+                    (doc.name && doc.name.toLowerCase().includes(term)) ||
+                    (doc.gender && doc.gender.toLowerCase().includes(term)) ||
+                    (doc.specialization && doc.specialization.toLowerCase().includes(term)) ||
+                    (doc.department_name && doc.department_name.toLowerCase().includes(term)) ||
+                    (doc.email && doc.email.toLowerCase().includes(term)) ||
+                    (doc.phone && doc.phone.includes(term))
+                );
+            }
+            renderDoctors(currentDoctors);
+        }
+
+        // Expose globally
+        window.filterDoctors = filterDoctors;
+        window.clearSearch = function() {
+            searchInput.value = '';
+            filterDoctors();
+        };
+
+        // ========== MODAL ELEMENTS ==========
+        const modal = document.getElementById('doctorModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const doctorIdInput = document.getElementById('doctorId');
+        const doctorIdField = document.getElementById('doctorIdField');
+        const doctorName = document.getElementById('doctorName');
+        const doctorGender = document.getElementById('doctorGender');
+        const doctorDob = document.getElementById('doctorDob');
+        const doctorEmail = document.getElementById('doctorEmail');
+        const doctorPhone = document.getElementById('doctorPhone');
+        const doctorAddress = document.getElementById('doctorAddress');
+        const doctorSpecialization = document.getElementById('doctorSpecialization');
+        const doctorQualification = document.getElementById('doctorQualification');
+        const doctorRegNo = document.getElementById('doctorRegNo');
+        const doctorExperience = document.getElementById('doctorExperience');
+        const doctorPreviousHospital = document.getElementById('doctorPreviousHospital');
+        const doctorDepartment = document.getElementById('doctorDepartment');
+        const doctorDesignation = document.getElementById('doctorDesignation');
+        const doctorJoiningDate = document.getElementById('doctorJoiningDate');
+        const doctorWorkingDays = document.getElementById('doctorWorkingDays');
+
+        function openAddModal() {
+            modalTitle.textContent = 'Add New Doctor';
+            doctorIdInput.value = '';
+            doctorIdField.value = '';
+            doctorName.value = '';
+            doctorGender.value = '';
+            doctorDob.value = '';
+            doctorEmail.value = '';
+            doctorPhone.value = '';
+            doctorAddress.value = '';
+            doctorSpecialization.value = '';
+            doctorQualification.value = '';
+            doctorRegNo.value = '';
+            doctorExperience.value = '';
+            doctorPreviousHospital.value = '';
+            doctorDepartment.value = '';
+            doctorDesignation.value = '';
+            doctorJoiningDate.value = '';
+            doctorWorkingDays.value = '';
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        window.editDoctor = function(id) {
+            const doctor = allDoctors.find(d => d.id === id);
+            if (!doctor) return;
+
+            modalTitle.textContent = 'Edit Doctor';
+            doctorIdInput.value = doctor.id;
+            doctorIdField.value = doctor.display_id ? doctor.display_id.replace(/^DOC0*/, '') : '';
+            doctorName.value = doctor.name || '';
+            doctorGender.value = doctor.gender || '';
+            doctorDob.value = doctor.date_of_birth || '';
+            doctorEmail.value = doctor.email || '';
+            doctorPhone.value = doctor.phone || '';
+            doctorAddress.value = doctor.address || '';
+            doctorSpecialization.value = doctor.specialization || '';
+            doctorQualification.value = doctor.qualification || '';
+            doctorRegNo.value = doctor.registration_number || '';
+            doctorExperience.value = doctor.experience_years || '';
+            doctorPreviousHospital.value = doctor.previous_hospital || '';
+            doctorDepartment.value = doctor.department_id || '';
+            doctorDesignation.value = doctor.designation || '';
+            doctorJoiningDate.value = doctor.joining_date || '';
+            doctorWorkingDays.value = doctor.working_days || '';
+            modal.classList.add('active');
+        };
+
+        // ========== SAVE DOCTOR ==========
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        window.saveDoctor = async function(event) {
+            event.preventDefault();
+
+            const id = doctorIdInput.value;
+            const payload = {
+                doctor_id: doctorIdField.value.trim(),
+                name: doctorName.value.trim(),
+                gender: doctorGender.value,
+                date_of_birth: doctorDob.value || null,
+                email: doctorEmail.value.trim(),
+                phone: doctorPhone.value.trim(),
+                address: doctorAddress.value.trim(),
+                specialization: doctorSpecialization.value.trim(),
+                qualification: doctorQualification.value.trim(),
+                registration_number: doctorRegNo.value.trim(),
+                experience_years: doctorExperience.value ? parseInt(doctorExperience.value) : null,
+                previous_hospital: doctorPreviousHospital.value.trim(),
+                department_id: doctorDepartment.value,
+                designation: doctorDesignation.value.trim(),
+                joining_date: doctorJoiningDate.value || null,
+                working_days: doctorWorkingDays.value.trim(),
+            };
+
+            if (!payload.name || !payload.gender || !payload.email || !payload.phone || !payload.specialization || !payload.department_id) {
+                alert('Please fill all required fields.');
+                return;
+            }
+
+            const url = id ? `/doctors/${id}/edit/` : '/doctors/add/';
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    if (id) {
+                        const index = allDoctors.findIndex(d => d.id === id);
+                        if (index !== -1) allDoctors[index] = data.doctor;
+                    } else {
+                        allDoctors.push(data.doctor);
+                    }
+                    filterDoctors();
+                    closeModal();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to save doctor');
+            }
+        };
+
+        // ========== DELETE DOCTOR ==========
+        window.deleteDoctor = async function(id) {
+            if (!confirm('Are you sure you want to delete this doctor?')) return;
+
+            try {
+                const response = await fetch(`/doctors/${id}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    allDoctors = allDoctors.filter(d => d.id !== id);
+                    filterDoctors();
+                } else {
+                    alert('Error deleting doctor');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to delete doctor');
+            }
+        };
+
+        // ========== CLOSE MODAL ON OUTSIDE CLICK ==========
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+
+        // ========== INITIAL RENDER ==========
+        renderDoctors(allDoctors);
+    </script>
+</body>
+</html>

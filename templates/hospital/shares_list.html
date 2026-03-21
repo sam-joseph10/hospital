@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Share Patient Details</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #f4f9ff 0%, #eaf2fd 100%);
+            overflow-x: hidden;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION – MATCHING DASHBOARD STYLE ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1e3a8a;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 180px;
+            border-radius: 16px;
+            box-shadow: 0 20px 35px -10px rgba(18, 52, 106, 0.3);
+            border: 1px solid #e0ecff;
+            z-index: 100;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content:hover {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            background: transparent;
+        }
+
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .dropdown-content a i {
+            width: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown:hover .dropdown-trigger i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.4rem 1.2rem 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d9e6ff;
+            box-shadow: 0 3px 10px rgba(0,35,70,0.05);
+            font-weight: 500;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .hospital-selector i {
+            color: #2563eb;
+            font-size: 1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Page Container - Responsive */
+        .page-container {
+            max-width: 90rem;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .page-container {
+                padding: 0 1.5rem;
+                margin: 1.5rem auto;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .page-container {
+                padding: 0 2rem;
+                margin: 2rem auto;
+            }
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                margin-bottom: 2rem;
+            }
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            font-weight: 700;
+            color: #0c2647;
+            line-height: 1.2;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 0.5rem;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+            border-radius: 100px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .back-link {
+                padding: 0.7rem 2rem;
+                font-size: 0.9rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        .back-link:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        /* Department Section */
+        .dept-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 20px -5px rgba(18, 52, 106, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (min-width: 768px) {
+            .dept-section {
+                padding: 1.5rem;
+                border-radius: 1.2rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dept-section {
+                padding: 1.8rem;
+                border-radius: 1.5rem;
+            }
+        }
+
+        .dept-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dept-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            color: #142d52;
+        }
+
+        @media (min-width: 768px) {
+            .dept-header h2 {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dept-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .dept-badge {
+            background: #eef2ff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4f46e5;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .dept-badge {
+                padding: 0.3rem 1.2rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .dept-selector-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .dept-selector-wrapper {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .dept-dropdown {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .dept-dropdown select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            appearance: none;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        @media (min-width: 768px) {
+            .dept-dropdown select {
+                padding: 0.9rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .dept-dropdown select:hover,
+        .dept-dropdown select:focus {
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .dept-dropdown i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4f46e5;
+            pointer-events: none;
+            font-size: 0.8rem;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            background: #eef2ff;
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            font-weight: 600;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .stat-pill {
+                padding: 0.4rem 1.2rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Search Section */
+        .search-section {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        @media (min-width: 640px) {
+            .search-section {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            width: 100%;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            background: white;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        @media (min-width: 768px) {
+            .search-wrapper input {
+                padding: 0.9rem 1.5rem 0.9rem 3rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .search-wrapper input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            align-self: flex-end;
+        }
+
+        @media (min-width: 640px) {
+            .clear-btn {
+                align-self: center;
+                padding: 0.5rem 1.2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .clear-btn:hover {
+            background: #eef2ff;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 10px 20px -5px rgba(18, 52, 106, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .table-container {
+                padding: 1.5rem;
+                border-radius: 1.2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .table-container {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Inter', sans-serif;
+            min-width: 900px;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.8rem 0.8rem;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        @media (min-width: 768px) {
+            th {
+                padding: 1rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            th {
+                padding: 1.2rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        td {
+            padding: 0.7rem 0.8rem;
+            border-bottom: 1px solid #eef4ff;
+            color: #1e2f4a;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            td {
+                padding: 0.9rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            td {
+                padding: 1rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        tr:hover td {
+            background: #f9fdff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.65rem;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .status-badge {
+                padding: 0.3rem 1rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        .status-cured {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-not-cured {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .share-btn {
+            background: #eef2ff;
+            border: none;
+            color: #4f46e5;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .share-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .share-btn:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Share Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 550px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlide 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                border-radius: 2rem;
+            }
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            padding: 1.5rem 1.5rem 1rem;
+            border-radius: 1.5rem 1.5rem 0 0;
+            position: relative;
+            color: white;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header {
+                padding: 2rem 2rem 1.5rem;
+            }
+        }
+
+        .modal-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .modal-header p {
+            opacity: 0.9;
+            font-size: 0.8rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 1.2rem;
+        }
+
+        @media (min-width: 768px) {
+            .modal-body {
+                padding: 2rem;
+            }
+        }
+
+        .patient-summary {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (min-width: 768px) {
+            .patient-summary {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        .patient-summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        @media (min-width: 768px) {
+            .patient-summary-item {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .patient-summary-item .label {
+            font-weight: 600;
+            color: #4f46e5;
+        }
+
+        .patient-summary-item .value {
+            font-weight: 500;
+            color: #1e2f4a;
+            text-align: right;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1e293b;
+            margin-bottom: 0.3rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-label {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .form-label i {
+            color: #4f46e5;
+            margin-right: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.7rem 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        @media (min-width: 768px) {
+            .form-control {
+                padding: 0.9rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .form-control:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: white;
+        }
+
+        textarea.form-control {
+            border-radius: 1rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid #eef4ff;
+        }
+
+        @media (min-width: 640px) {
+            .modal-footer {
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: #4a6a97;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .btn-secondary {
+                padding: 0.8rem 2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .btn-primary {
+                padding: 0.8rem 2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4338ca, #1e4f9c);
+            transform: translateY(-2px);
+        }
+
+        /* ===== SUCCESS TOAST NOTIFICATION ===== */
+        .toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #10b981;
+            min-width: 280px;
+            max-width: 350px;
+        }
+
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .toast-content h4 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+        }
+
+        .toast-content p {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0.2rem;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #4f46e5;
+        }
+
+        @media (max-width: 480px) {
+            .toast-notification {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Responsive Navigation Adjustments */
+        @media (max-width: 900px) {
+            .navbar-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+                padding: 0.8rem 1.5rem;
+            }
+            .nav-right {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .nav-links {
+                flex: 1;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .logo {
+                font-size: 1.4rem;
+                white-space: nowrap;
+            }
+            .nav-right {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                width: auto;
+                justify-content: flex-end;
+            }
+            .nav-links {
+                flex: none;
+                width: auto;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                margin: 0;
+            }
+            .dropdown-content {
+                right: 0;
+                left: auto;
+                min-width: 160px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .back-link {
+                width: 100%;
+                justify-content: center;
+            }
+            .dept-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .dept-badge {
+                align-self: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-container {
+                padding: 0.5rem 0.8rem;
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            .dropdown-content {
+                min-width: 140px;
+            }
+            .page-container {
+                padding: 0 1rem;
+            }
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+            .dept-section {
+                padding: 1rem;
+            }
+            .stats-summary {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .patient-summary-item {
+                flex-direction: column;
+                gap: 0.2rem;
+            }
+            .patient-summary-item .value {
+                text-align: left;
+            }
+            .modal-footer {
+                flex-direction: column;
+            }
+            .btn-secondary,
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .share-btn {
+                width: 44px;
+                height: 44px;
+            }
+            .dept-dropdown select,
+            .form-control {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION - MATCHING DASHBOARD STYLE ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'viewer_dashboard' %}" class="logo">MedTrack</a>
+            
+            <div class="nav-right">
+                <div class="nav-links">
+                    <div class="dropdown">
+                        <div class="dropdown-trigger nav-item">
+                            <div class="hospital-selector">
+                                <i class="fas fa-hospital"></i>
+                                <span>{{ request.user.hospital.name|default:"Hospital" }}</span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== SHARE PAGE CONTENT ===== -->
+    <div class="page-container">
+        <div class="page-header">
+            <h1><i class="fas fa-share-alt"></i> Share Patient Details</h1>
+            <a href="#" class="back-link" onclick="history.back(); return false;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Department selection card -->
+        <div class="dept-section">
+            <div class="dept-header">
+                <h2><i class="fas fa-stethoscope" style="color:#4f46e5; margin-right: 0.5rem;"></i> Select Department</h2>
+                <span class="dept-badge">{{ departments|length }} departments</span>
+            </div>
+
+            <div class="dept-selector-wrapper">
+                <div class="dept-dropdown">
+                    <select id="departmentSelect" onchange="handleDepartmentChange()">
+                        <option value="__all__">All Departments</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.name }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <div class="stats-summary" id="statsSummary">
+                    <span class="stat-pill"><i class="fas fa-users"></i> <span id="patientCount">0</span> patients</span>
+                    <span class="stat-pill"><i class="fas fa-check-circle"></i> <span id="curedCount">0</span> cured</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Search Bar -->
+        <div class="search-section">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="patientSearch" placeholder="Search by name, ID, doctor, diagnosis, status..." onkeyup="filterPatients()">
+            </div>
+            <button class="clear-btn" onclick="clearSearch()">
+                <i class="fas fa-times"></i> Clear Search
+            </button>
+        </div>
+
+        <!-- Patients table with share button -->
+        <div class="table-container">
+            <table id="patientTable">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Patient Name</th>
+                        <th>Gender</th>
+                        <th>Department</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Joining Date</th>
+                        <th>Discharge Date</th>
+                        <th>Status</th>
+                        <th>Share</th>
+                    </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="10" class="empty-state">Select a department to view patients</td></tr>
+                </tbody>
+             </table>
+        </div>
+    </div>
+
+    <!-- ===== SHARE MODAL ===== -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-envelope" style="margin-right: 0.5rem;"></i> Share Patient Details</h2>
+                <p>Send patient information via email</p>
+                <button class="modal-close" onclick="closeShareModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Patient Summary -->
+                <div class="patient-summary" id="patientSummary">
+                    <!-- filled dynamically -->
+                </div>
+
+                <form id="shareForm" onsubmit="sendShareEmail(event)">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-envelope"></i> Recipient Email</label>
+                        <input type="email" class="form-control" id="recipientEmail" placeholder="doctor@hospital.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-subject"></i> Subject</label>
+                        <input type="text" class="form-control" id="emailSubject" value="Patient Medical Records - MedTrack" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-comment"></i> Additional Message (Optional)</label>
+                        <textarea class="form-control" id="emailMessage" placeholder="Enter any additional notes..."></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeShareModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUCCESS TOAST NOTIFICATION ===== -->
+    <div id="successToast" class="toast-notification">
+        <div class="toast-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="toast-content">
+            <h4>Email Sent Successfully!</h4>
+            <p>Patient details have been shared</p>
+        </div>
+        <button class="toast-close" onclick="closeToast()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Pass data from Django -->
+    {{ patients_json|json_script:"patients-data" }}
+
+    <script>
+(function() {
+    // ========== LOAD REAL DATA ==========
+    let allPatients = [];
+    try {
+        const raw = document.getElementById('patients-data').textContent;
+        allPatients = JSON.parse(raw);
+        console.log(`✅ Loaded ${allPatients.length} patients`);
+    } catch (e) {
+        console.error('❌ Failed to parse patients JSON:', e);
+        allPatients = [];
+    }
+
+    if (!Array.isArray(allPatients)) {
+        allPatients = Array.from(allPatients || []);
+    }
+
+    // DOM elements
+    const deptSelect = document.getElementById('departmentSelect');
+    const searchInput = document.getElementById('patientSearch');
+    const tbody = document.getElementById('tableBody');
+    const patientCountSpan = document.getElementById('patientCount');
+    const curedCountSpan = document.getElementById('curedCount');
+
+    let currentPatients = [];
+
+    // ========== FILTER FUNCTION ==========
+    function filterPatients() {
+        const selectedDept = deptSelect.value;
+        const searchTerm = searchInput.value.toLowerCase().trim();
+
+        let filtered = allPatients;
+
+        if (selectedDept !== '__all__' && selectedDept) {
+            filtered = filtered.filter(p => p.department === selectedDept);
+        }
+
+        if (searchTerm) {
+            filtered = filtered.filter(p =>
+                (p.name && p.name.toLowerCase().includes(searchTerm)) ||
+                (p.id && p.id.toLowerCase().includes(searchTerm)) ||
+                (p.doctor && p.doctor.toLowerCase().includes(searchTerm)) ||
+                (p.diagnosis && p.diagnosis.toLowerCase().includes(searchTerm)) ||
+                (p.status && p.status.toLowerCase().includes(searchTerm)) ||
+                (p.gender && p.gender.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        currentPatients = filtered;
+        renderTable(filtered);
+    }
+
+    // ========== RENDER TABLE ==========
+    function renderTable(patients) {
+        patientCountSpan.textContent = patients.length;
+        curedCountSpan.textContent = patients.filter(p => p.status === 'cured').length;
+
+        if (patients.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="empty-state">No patients match your criteria</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        patients.forEach(p => {
+            const statusClass = p.status === 'cured' ? 'status-cured' : 'status-not-cured';
+            let statusText = 'Not cured';
+            if (p.status === 'cured') statusText = 'Cured';
+            else if (p.status === 'dead') statusText = 'Deceased';
+            else if (p.status === 'shifted') statusText = 'Shifted';
+
+            html += `<tr>
+                <td><span style="font-family: monospace; font-weight:600;">${p.id || '—'}</span></td>
+                <td>${p.name || '—'}</td>
+                <td>${p.gender || '—'}</td>
+                <td>${p.department || '—'}</td>
+                <td>${p.doctor || '—'}</td>
+                <td>${p.diagnosis || '—'}</td>
+                <td>${p.joinDate || '—'}</td>
+                <td>${p.dischargeDate || '—'}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>
+                    <button class="share-btn" onclick="window.openShareModal('${p.id}')" title="Share patient details">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ========== SEARCH CLEAR ==========
+    window.clearSearch = function() {
+        searchInput.value = '';
+        filterPatients();
+    };
+
+    // ========== DEPARTMENT CHANGE ==========
+    window.handleDepartmentChange = function() {
+        searchInput.value = '';
+        filterPatients();
+    };
+
+    // ========== TOAST FUNCTIONS ==========
+    function showToast() {
+        const toast = document.getElementById('successToast');
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    window.closeToast = function() {
+        document.getElementById('successToast').classList.remove('show');
+    };
+
+    // ========== SHARE MODAL ==========
+    let currentPatient = null;
+
+    window.openShareModal = function(patientId) {
+        currentPatient = allPatients.find(p => p.id === patientId);
+        if (!currentPatient) {
+            alert('Patient not found');
+            return;
+        }
+
+        const summaryHtml = `
+            <div class="patient-summary-item">
+                <span class="label">Patient ID:</span>
+                <span class="value">${currentPatient.id}</span>
+            </div>
+            <div class="patient-summary-item">
+                <span class="label">Name:</span>
+                <span class="value">${currentPatient.name}</span>
+            </div>
+            <div class="patient-summary-item">
+                <span class="label">Department:</span>
+                <span class="value">${currentPatient.department}</span>
+            </div>
+            <div class="patient-summary-item">
+                <span class="label">Doctor:</span>
+                <span class="value">${currentPatient.doctor}</span>
+            </div>
+            <div class="patient-summary-item">
+                <span class="label">Status:</span>
+                <span class="value">${currentPatient.status === 'cured' ? 'Cured' : (currentPatient.status === 'dead' ? 'Deceased' : (currentPatient.status === 'shifted' ? 'Shifted' : 'Not cured'))}</span>
+            </div>
+        `;
+        document.getElementById('patientSummary').innerHTML = summaryHtml;
+        document.getElementById('emailSubject').value = `Patient Medical Records - ${currentPatient.id} - ${currentPatient.name}`;
+        document.getElementById('shareModal').classList.add('active');
+    };
+
+    window.closeShareModal = function() {
+        document.getElementById('shareModal').classList.remove('active');
+        document.getElementById('recipientEmail').value = '';
+        document.getElementById('emailMessage').value = '';
+    };
+
+    window.sendShareEmail = function(event) {
+        event.preventDefault();
+
+        const recipient = document.getElementById('recipientEmail').value;
+        const subject = document.getElementById('emailSubject').value;
+        const message = document.getElementById('emailMessage').value;
+
+        if (!currentPatient) {
+            alert('No patient selected.');
+            return;
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        fetch('/viewer/share-patient/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                patient_id: currentPatient.id,
+                email: recipient,
+                subject: subject,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeShareModal();
+                showToast();
+            } else {
+                alert('❌ Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Failed to send share request.');
+        });
+    };
+
+    document.getElementById('shareModal').addEventListener('click', function(e) {
+        if (e.target === this) closeShareModal();
+    });
+
+    window.filterPatients = filterPatients;
+
+    filterPatients();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Operator Dashboard</title>
+    <!-- Google Fonts (same theme) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f4f9ff 0%, #eaf2fd 100%);
+            min-height: 100vh;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION WITH ENHANCED DROPDOWN ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Premium Hospital Dropdown */
+        .hospital-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: linear-gradient(135deg, #ffffff, #f8fcff);
+            padding: 0.6rem 1.5rem 0.6rem 1.2rem;
+            border-radius: 40px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .hospital-selector:hover {
+            background: white;
+            border-color: #2563eb;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .hospital-selector i:first-child {
+            color: #2563eb;
+            font-size: 1.1rem;
+        }
+
+        .hospital-selector i:last-child {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: transform 0.3s ease;
+        }
+
+        .hospital-dropdown:hover .hospital-selector i:last-child {
+            transform: rotate(180deg);
+        }
+
+        /* Premium Dropdown Menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            min-width: 260px;
+            border-radius: 1.2rem;
+            box-shadow: 0 20px 40px -12px rgba(18, 52, 106, 0.3);
+            border: 1px solid rgba(37, 99, 235, 0.15);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .hospital-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #1e293b;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-bottom: 1px solid #eef4ff;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            color: #2563eb;
+        }
+
+        .dropdown-item i {
+            width: 1.5rem;
+            font-size: 1.1rem;
+            color: #2563eb;
+        }
+
+        .dropdown-item.logout-item {
+            color: #b91c1c;
+            border-top: 1px solid #fee2e2;
+            background: #fff5f5;
+        }
+
+        .dropdown-item.logout-item i {
+            color: #b91c1c;
+        }
+
+        .dropdown-item.logout-item:hover {
+            background: #fee2e2;
+        }
+
+        /* ===== PAGE CONTAINER ===== */
+        .page-container {
+            max-width: 90rem;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Enhanced Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0c2647, #1e3a8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ===== PREMIUM GOOGLE-STYLE CARDS ===== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .google-card {
+            background: white;
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 20px -8px rgba(37, 99, 235, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.7);
+            position: relative;
+        }
+
+        .google-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 2rem;
+            padding: 2px;
+            background: linear-gradient(135deg, #2563eb20, #4f46e520, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .google-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 40px -15px rgba(37, 99, 235, 0.3);
+        }
+
+        .card-image {
+            height: 170px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .card-image-1 {
+            background-image: url('https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=2070&auto=format&fit=crop');
+        }
+        .card-image-2 {
+            background-image: url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2080&auto=format&fit=crop');
+        }
+        .card-image-3 {
+            background-image: url('https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=1974&auto=format&fit=crop');
+        }
+        .card-image-4 {
+            background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop');
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,20,40,0.8), transparent);
+            padding: 1.5rem 1rem 1rem;
+            color: white;
+            backdrop-filter: blur(2px);
+        }
+
+        .card-overlay h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .card-overlay p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+
+        .card-stats {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== PROFESSIONAL CIRCULAR ICONS - NO ANIMATIONS ===== */
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.2);
+            border: 2px solid rgba(37, 99, 235, 0.1);
+        }
+
+        /* Different colors for each card - no animations */
+        .google-card:nth-child(1) .card-icon {
+            color: #2563eb;
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+        .google-card:nth-child(2) .card-icon {
+            color: #7c3aed;
+            border-color: rgba(124, 58, 237, 0.2);
+        }
+        .google-card:nth-child(3) .card-icon {
+            color: #0891b2;
+            border-color: rgba(8, 145, 178, 0.2);
+        }
+        .google-card:nth-child(4) .card-icon {
+            color: #059669;
+            border-color: rgba(5, 150, 105, 0.2);
+        }
+
+        /* Responsive icon adjustments */
+        @media (max-width: 1200px) {
+            .card-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .card-icon {
+                width: 52px;
+                height: 52px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
+            }
+        }
+
+        /* ===== PROFESSIONAL FORM SECTION ===== */
+        .form-section-container {
+            margin-top: 2rem;
+            display: none;
+            animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-section-container.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 2.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(18, 52, 106, 0.25);
+            border: 1px solid rgba(255,255,255,0.7);
+            position: relative;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #4f46e5, #2563eb, #06b6d4);
+            border-radius: 2.5rem 2.5rem 0 0;
+        }
+
+        .form-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #142d52, #1e3a8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .form-title i {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .form-label i {
+            color: #2563eb;
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e0ecff;
+            border-radius: 60px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+            background: #f8fcff;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            background: white;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.2rem center;
+            background-size: 1rem;
+        }
+
+        /* Premium Attachment Sections */
+        .attachment-section {
+            background: linear-gradient(135deg, #f8fcff, #f0f7ff);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid rgba(37, 99, 235, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .attachment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .attachment-title {
+            font-weight: 700;
+            color: #1e3a8a;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1rem;
+        }
+
+        .attachment-title i {
+            color: #2563eb;
+            font-size: 1.2rem;
+        }
+
+        .unlimited-badge {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .add-attachment-btn {
+            background: white;
+            border: 1.5px solid #2563eb;
+            color: #2563eb;
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .add-attachment-btn:hover {
+            background: #2563eb;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+        }
+
+        .attachment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 60px;
+            border: 1px solid #e0ecff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .attachment-item:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .attachment-icon {
+            color: #2563eb;
+            font-size: 1.1rem;
+        }
+
+        .attachment-name {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1e2f4a;
+        }
+
+        .attachment-size {
+            color: #64748b;
+            font-size: 0.8rem;
+            background: #f1f5f9;
+            padding: 0.2rem 0.6rem;
+            border-radius: 60px;
+        }
+
+        .remove-attachment {
+            color: #dc2626;
+            background: #fee2e2;
+            border: none;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .remove-attachment:hover {
+            background: #dc2626;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* Premium Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 1.2rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 2px solid #e0ecff;
+            padding: 1rem 2.5rem;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #4a6a97;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fcff;
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px -6px #2563eb;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e4f9c, #4338ca);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -8px #1e3f8a;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .page-container { padding: 0 1rem; }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-actions {
+                flex-direction: column;
+            }
+            .btn-secondary, .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+            .dropdown-menu {
+                right: auto;
+                left: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            .card-image {
+                height: 150px;
+            }
+            .form-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION WITH PREMIUM DROPDOWN ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">MedTrack</div>
+            <div class="nav-right">
+                <!-- Hospital Dropdown with Logout inside -->
+                <div class="hospital-dropdown">
+                    <div class="hospital-selector">
+                        <i class="fas fa-hospital"></i>
+                        <span>Metro General</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-menu">
+                        
+                        <div class="dropdown-item logout-item" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== OPERATOR DASHBOARD ===== -->
+    <div class="page-container">
+        <div class="page-header">
+            <h1><i class="fas fa-clipboard-list"></i> Operator Dashboard</h1>
+        </div>
+
+        <!-- Premium Google-style Cards - Updated with Report, Summary, and Edit -->
+        <div class="cards-grid">
+            <!-- Card 1: New Patient -->
+            <div class="google-card" onclick="toggleNewPatientForm()">
+                <div class="card-image card-image-1">
+                    <div class="card-overlay">
+                        <h3>New Patient</h3>
+                        <p>Register new patient</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                                    </div>
+            </div>
+
+            <!-- Card 2: Report -->
+            <div class="google-card" onclick="viewReport()">
+                <div class="card-image card-image-2">
+                    <div class="card-overlay">
+                        <h3>Report</h3>
+                        <p>Generate & view reports</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                                    </div>
+            </div>
+
+            <!-- Card 3: Summary -->
+            <div class="google-card" onclick="viewSummary()">
+                <div class="card-image card-image-3">
+                    <div class="card-overlay">
+                        <h3>Summary</h3>
+                        <p>Daily patient summary</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                                    </div>
+            </div>
+
+            <!-- Card 4: Edit -->
+            <div class="google-card" onclick="viewEdit()">
+                <div class="card-image card-image-4">
+                    <div class="card-overlay">
+                        <h3>Edit</h3>
+                        <p>Modify patient records</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Patient Form Section -->
+        <div id="newPatientFormSection" class="form-section-container">
+            <div class="form-card">
+                <div class="form-title">
+                    <i class="fas fa-user-plus"></i> Register New Patient
+                </div>
+
+                <form id="newPatientForm" enctype="multipart/form-data" onsubmit="saveNewPatient(event)">
+            {% csrf_token %}
+
+            <!-- Patient basic details (snapshot) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-id-card"></i> Patient ID *</label>
+                    <input type="text" name="patient_id" class="form-control" required placeholder="External hospital ID">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-user"></i> Full Name *</label>
+                    <input type="text" name="patient_name" class="form-control" required placeholder="Enter full name">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-venus-mars"></i> Gender *</label>
+                    <select name="gender" class="form-control" required>
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-calendar"></i> Date of Birth *</label>
+                    <input type="date" name="date_of_birth" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-phone"></i> Mobile Number *</label>
+                    <input type="tel" name="phone" class="form-control" required placeholder="Enter mobile number">
+                </div>
+                <!-- Department dropdown (filtered by hospital) -->
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-building"></i> Department *</label>
+                    <select name="department" class="form-control" required>
+                        <option value="">Select department</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <!-- Doctor dropdown (initially populated with all doctors in hospital) -->
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-user-md"></i> Doctor *</label>
+                    <select name="doctor" class="form-control" required>
+                        <option value="">Select doctor</option>
+                        {% for doc in doctors %}
+                            <option value="{{ doc.id }}">{{ doc.name }} ({{ doc.specialization }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-calendar-check"></i> Visit Date *</label>
+                    <input type="date" name="visit_date" class="form-control" required>
+                </div>
+            </div>
+
+            <!-- Diagnosis and Notes -->
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-stethoscope"></i> Diagnosis *</label>
+                <textarea name="diagnosis" class="form-control" rows="3" required placeholder="Enter diagnosis"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-notes-medical"></i> Additional Notes</label>
+                <textarea name="notes" class="form-control" rows="2" placeholder="Optional notes"></textarea>
+            </div>
+
+            <!-- Status and Discharge Date -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-tag"></i> Status *</label>
+                    <select name="status" class="form-control" required>
+                        <option value="">Select status</option>
+                        <option value="cured">Cured</option>
+                        <option value="dead">Deceased</option>
+                        <option value="shifted">Shifted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-calendar-times"></i> Discharge Date *</label>
+                    <input type="date" name="discharge_date" class="form-control" required>
+                </div>
+            </div>
+
+            <!-- Attachments (categorized) -->
+            <div class="attachment-section">
+                <div class="attachment-header">
+                    <div class="attachment-title">
+                        <i class="fas fa-tint"></i> Blood Reports
+                    </div>
+                    <button type="button" class="add-attachment-btn" onclick="addAttachment('blood')">
+                        <i class="fas fa-plus"></i> Add Report
+                    </button>
+                </div>
+                <div class="attachment-list" id="bloodAttachments"></div>
+                <input type="file" id="bloodFileInput" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleAttachmentSelect('blood')">
+            </div>
+
+            <div class="attachment-section">
+                <div class="attachment-header">
+                    <div class="attachment-title">
+                        <i class="fas fa-x-ray"></i> Scan Reports
+                    </div>
+                    <button type="button" class="add-attachment-btn" onclick="addAttachment('scan')">
+                        <i class="fas fa-plus"></i> Add Report
+                    </button>
+                </div>
+                <div class="attachment-list" id="scanAttachments"></div>
+                <input type="file" id="scanFileInput" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png,.dcm" onchange="handleAttachmentSelect('scan')">
+            </div>
+
+            <div class="attachment-section">
+                <div class="attachment-header">
+                    <div class="attachment-title">
+                        <i class="fas fa-file-medical"></i> Discharge Summaries
+                    </div>
+                    <button type="button" class="add-attachment-btn" onclick="addAttachment('discharge')">
+                        <i class="fas fa-plus"></i> Add Summary
+                    </button>
+                </div>
+                <div class="attachment-list" id="dischargeAttachments"></div>
+                <input type="file" id="dischargeFileInput" class="file-input-hidden" multiple accept=".pdf,.doc,.docx" onchange="handleAttachmentSelect('discharge')">
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="toggleNewPatientForm()">Cancel</button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Register Patient
+                </button>
+            </div>
+        </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== ATTACHMENT MANAGEMENT ====================
+        let attachments = {
+            blood: [],
+            scan: [],
+            discharge: []
+        };
+
+        function addAttachment(type) {
+            document.getElementById(`${type}FileInput`).click();
+        }
+
+        function handleAttachmentSelect(type) {
+            const input = document.getElementById(`${type}FileInput`);
+            const files = Array.from(input.files);
+            
+            files.forEach(file => {
+                attachments[type].push({
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    file: file
+                });
+            });
+            
+            displayAttachments(type);
+            input.value = '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function displayAttachments(type) {
+            const container = document.getElementById(`${type}Attachments`);
+            const typeAttachments = attachments[type];
+            
+            if (typeAttachments.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            typeAttachments.forEach((att, index) => {
+                html += `
+                    <div class="attachment-item">
+                        <i class="fas fa-file-medical attachment-icon"></i>
+                        <span class="attachment-name">${att.name}</span>
+                        <span class="attachment-size">${att.size}</span>
+                        <button type="button" class="remove-attachment" onclick="removeAttachment('${type}', ${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function removeAttachment(type, index) {
+            attachments[type].splice(index, 1);
+            displayAttachments(type);
+        }
+
+        // ==================== FORM TOGGLE ====================
+        function toggleNewPatientForm() {
+            const formSection = document.getElementById('newPatientFormSection');
+            formSection.classList.toggle('active');
+            
+            if (formSection.classList.contains('active')) {
+                setTimeout(() => {
+                    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+
+        async function saveNewPatient(event) {
+            console.log("Saving new patient...");
+    event.preventDefault();
+
+    const form = document.getElementById('newPatientForm');
+    const formData = new FormData(form);
+
+    // Append files from our attachment arrays with their categories
+    for (let type of ['blood', 'scan', 'discharge']) {
+        const files = attachments[type];
+        for (let i = 0; i < files.length; i++) {
+            // Use naming: category_index (e.g., blood_0) – backend will parse
+            formData.append(`attachment_${type}_${i}`, files[i].file);
+            // Also store the category for each file (could also be sent as separate field)
+            // We'll rely on the naming prefix to determine category on the backend.
+        }
+    }
+
+    try {
+        const response = await fetch('/api/patient-visits/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')  // Helper function to get CSRF token
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(`✅ Patient registered successfully!\n\n` +
+                  `Patient ID: ${result.patient_id}\n` +
+                  `Visit ID: ${result.visit_id}\n` +
+                  `Documents uploaded: ${result.attachments_count}`);
+
+            // Reset form
+            form.reset();
+            attachments = { blood: [], scan: [], discharge: [] };
+            displayAttachments('blood');
+            displayAttachments('scan');
+            displayAttachments('discharge');
+            toggleNewPatientForm();
+        } else {
+            alert(`❌ Error: ${result.error || 'Unknown error'}`);
+        }
+    } catch (error) {
+        alert(`❌ Network error: ${error.message}`);
+    }
+}
+
+// Helper to get CSRF token (standard Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+        // ==================== CARD ACTIONS ====================
+        function viewReport() {
+            window.location.href = "{% url 'reports_list' %}";
+            //alert('Navigate to Reports page');
+        }
+
+        function viewSummary() {
+            window.location.href = "{% url 'summary' %}";
+            //alert('Navigate to Daily Summary page');
+        }
+
+        function viewEdit() {
+            window.location.href = "{% url 'patients_list' %}";
+
+            //alert('Navigate to Edit Patient Records page');
+        }
+
+        function handleLogout() {
+            window.location.href = "{% url 'logout' %}";
+            //alert('Logged out successfully');
+        }
+
+        // Initialize displays
+        displayAttachments('blood');
+        displayAttachments('scan');
+        displayAttachments('discharge');
+    </script>
+</body>
+</html>

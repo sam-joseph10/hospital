@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · {{ month_name }} Department Overview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+            overflow-x: hidden;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION – FULLY RESPONSIVE ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: clamp(1.2rem, 5vw, 1.875rem);
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1e3a8a;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 160px;
+            border-radius: 16px;
+            box-shadow: 0 20px 35px -10px rgba(18, 52, 106, 0.3);
+            border: 1px solid #e0ecff;
+            z-index: 100;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content:hover {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            background: transparent;
+        }
+
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 0.7rem 1.2rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .dropdown-content a i {
+            width: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown:hover .dropdown-trigger i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d9e6ff;
+            box-shadow: 0 3px 10px rgba(0,35,70,0.05);
+            font-weight: 500;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .hospital-selector i {
+            color: #2563eb;
+            font-size: 0.9rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Page Container - Responsive Padding */
+        .page-container {
+            max-width: 90rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .page-container {
+                padding: 0 1.5rem;
+                margin: 2rem auto;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .page-container {
+                padding: 0 2rem;
+                margin: 2rem auto;
+            }
+        }
+
+        /* Header Section - Responsive */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .page-header {
+                margin-bottom: 2.5rem;
+            }
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(to right, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 0.5rem;
+            font-size: clamp(1rem, 4vw, 2rem);
+        }
+
+        .back-link, .chart-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .back-link, .chart-btn {
+                padding: 0.6rem 1.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .back-link, .chart-btn {
+                padding: 0.75rem 2rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .back-link {
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-link:hover {
+            background: #f8fafc;
+            border-color: #c7d2fe;
+        }
+
+        .chart-btn {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+            cursor: pointer;
+        }
+
+        .chart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 480px) {
+            .button-group {
+                width: 100%;
+            }
+            .back-link, .chart-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* Hospital Info Card - Responsive */
+        .hospital-info-card {
+            background: white;
+            border-radius: 1.2rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .hospital-info-card {
+                border-radius: 1.5rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hospital-info-card {
+                margin-bottom: 3rem;
+            }
+        }
+
+        .hospital-header {
+            background: linear-gradient(135deg, #eef2ff 0%, #eff6ff 100%);
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .hospital-header {
+                padding: 1.2rem 1.5rem;
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hospital-header {
+                padding: 1.5rem 2rem;
+            }
+        }
+
+        .hospital-icon {
+            width: clamp(45px, 8vw, 60px);
+            height: clamp(45px, 8vw, 60px);
+            background: linear-gradient(to right, #4f46e5, #2563eb);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+
+        .hospital-title h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+        }
+
+        .hospital-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .hospital-meta {
+                gap: 1.5rem;
+            }
+        }
+
+        .hospital-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #4f46e5;
+            font-weight: 500;
+            font-size: 0.7rem;
+        }
+
+        @media (min-width: 768px) {
+            .hospital-meta span {
+                font-size: 0.8rem;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hospital-meta span {
+                font-size: 0.875rem;
+            }
+        }
+
+        .hospital-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+        }
+
+        @media (min-width: 768px) {
+            .hospital-stats {
+                padding: 1.2rem 1.5rem;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hospital-stats {
+                padding: 1.5rem 2rem;
+                gap: 2rem;
+            }
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        @media (max-width: 480px) {
+            .stat-item {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        .stat-value {
+            font-size: clamp(1.3rem, 5vw, 2rem);
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .stat-label {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .stat-label {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Section Title - Responsive */
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 5vw, 2rem);
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        @media (min-width: 768px) {
+            .section-title {
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .section-title {
+                margin-bottom: 2rem;
+            }
+        }
+
+        .section-title i {
+            background: linear-gradient(to right, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .section-title span {
+            background: #e6f0ff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4f46e5;
+        }
+
+        @media (min-width: 768px) {
+            .section-title span {
+                padding: 0.25rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .section-title span {
+                padding: 0.3rem 1.2rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        .title-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .title-left {
+                gap: 1rem;
+            }
+        }
+
+        /* Department Cards Grid - Fully Responsive */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 480px) {
+            .dept-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .dept-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dept-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .dept-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        .dept-card {
+            background: white;
+            border-radius: 0.8rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @media (min-width: 768px) {
+            .dept-card {
+                border-radius: 1rem;
+            }
+        }
+
+        .dept-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
+            border-color: #c7d2fe;
+        }
+
+        .icon-container {
+            position: relative;
+            height: clamp(80px, 15vw, 100px);
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-wrapper {
+            width: clamp(40px, 10vw, 55px);
+            height: clamp(40px, 10vw, 55px);
+            background: white;
+            border-radius: clamp(12px, 3vw, 16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dept-card:hover .icon-wrapper {
+            transform: scale(1.05);
+        }
+
+        .dept-symbol {
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            line-height: 1;
+        }
+
+        .icon-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 35px;
+            background: linear-gradient(to top, white, transparent);
+            z-index: 1;
+        }
+
+        .month-indicator {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        @media (min-width: 768px) {
+            .month-indicator {
+                top: 8px;
+                left: 8px;
+                padding: 0.2rem 0.8rem;
+                font-size: 0.65rem;
+            }
+        }
+
+        .month-indicator i {
+            font-size: 0.55rem;
+        }
+
+        .count-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            font-size: 0.55rem;
+            font-weight: 600;
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            backdrop-filter: blur(4px);
+            z-index: 3;
+        }
+
+        @media (min-width: 768px) {
+            .count-badge {
+                top: 8px;
+                right: 8px;
+                width: 26px;
+                height: 26px;
+                font-size: 0.65rem;
+            }
+        }
+
+        .card-content {
+            padding: 0.7rem;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .card-content {
+                padding: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .card-content {
+                padding: 1rem;
+            }
+        }
+
+        .dept-info h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
+        }
+
+        @media (min-width: 768px) {
+            .dept-info h3 {
+                margin-bottom: 0.6rem;
+            }
+        }
+
+        .dept-stats {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .dept-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: #f8fafc;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.6rem;
+        }
+
+        @media (min-width: 768px) {
+            .dept-stat {
+                padding: 0.25rem 0.7rem;
+                font-size: 0.7rem;
+                gap: 0.25rem;
+            }
+        }
+
+        .dept-stat i {
+            color: #4f46e5;
+            font-size: 0.55rem;
+        }
+
+        @media (min-width: 768px) {
+            .dept-stat i {
+                font-size: 0.65rem;
+            }
+        }
+
+        .dept-stat span {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal - Responsive */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeInModal 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .chart-modal {
+            background: white;
+            border-radius: 1.2rem;
+            max-width: 95%;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: modalSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (min-width: 480px) {
+            .chart-modal {
+                max-width: 90%;
+            }
+        }
+
+        @media (min-width: 640px) {
+            .chart-modal {
+                max-width: 550px;
+            }
+        }
+
+        .chart-modal-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            padding: 1rem 1.2rem;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .chart-modal-header {
+                padding: 1.2rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chart-modal-header {
+                padding: 1.5rem 2rem;
+            }
+        }
+
+        .chart-modal-header h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(0.9rem, 4vw, 1.25rem);
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .modal-close {
+                width: 32px;
+                height: 32px;
+                font-size: 1.2rem;
+            }
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .chart-modal-body {
+            padding: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .chart-modal-body {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chart-modal-body {
+                padding: 2rem;
+            }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 220px;
+            width: 100%;
+        }
+
+        @media (min-width: 480px) {
+            .chart-container {
+                height: 260px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        canvas {
+            max-height: 100%;
+            width: 100% !important;
+        }
+
+        .chart-legend {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+            .chart-legend {
+                margin-top: 1.2rem;
+                gap: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chart-legend {
+                margin-top: 1.5rem;
+            }
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.65rem;
+            color: #475569;
+        }
+
+        @media (min-width: 768px) {
+            .legend-item {
+                font-size: 0.75rem;
+                gap: 0.5rem;
+            }
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        @media (min-width: 768px) {
+            .legend-color {
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (min-width: 768px) {
+            .empty-state {
+                padding: 3rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .empty-state {
+                padding: 4rem;
+            }
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        @media (min-width: 768px) {
+            .empty-state i {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .empty-state i {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'viewer_dashboard' %}" class="logo">MedTrack</a>
+            
+            <div class="nav-right">
+                <div class="nav-links">
+                    <div class="dropdown">
+                        <div class="dropdown-trigger nav-item">
+                            <div class="hospital-selector">
+                                <i class="fas fa-hospital"></i>
+                                <span>{{ hospital_name }}</span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="page-container">
+        <!-- Header with Back Link and Chart Button -->
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-calendar-alt"></i> 
+                {{ month_name }} {{ year }} - Departments
+            </h1>
+            <div class="button-group">
+                <button class="chart-btn" onclick="openChartModal()">
+                    <i class="fas fa-chart-pie"></i> View Analytics
+                </button>
+                <a href="#" class="back-link" onclick="history.back(); return false;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Hospital Info Card -->
+        <div class="hospital-info-card">
+            <div class="hospital-header">
+                <div class="hospital-icon">
+                    <i class="fas fa-hospital"></i>
+                </div>
+
+                <div class="hospital-title">
+                    <h2>{{ hospital_name }}</h2>
+
+                    <div class="hospital-meta">
+                        <span>
+                            <i class="fas fa-location-dot"></i> 
+                            {{ hospital_address }}
+                        </span>
+
+                        <span>
+                            <i class="fas fa-phone"></i> 
+                            {{ hospital_phone }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hospital-stats">
+                <div class="stat-item">
+                    <span class="stat-value">{{ monthly_dept_count|intcomma }}</span>
+                    <span class="stat-label">
+                        <i class="fas fa-stethoscope"></i> Active Depts
+                    </span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ monthly_patients|intcomma }}</span>
+                    <span class="stat-label">
+                        <i class="fas fa-users"></i> {{ month_name }} Patients
+                    </span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ monthly_cured|intcomma }}</span>
+                    <span class="stat-label">
+                        <i class="fas fa-check-circle"></i> Cured this Month
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Departments Section -->
+        <div class="section-title">
+            <div class="title-left">
+                <i class="fas fa-stethoscope"></i>
+                {{ month_name }} {{ year }} - Department Activity
+                <span>{{ monthly_dept_count }} Active Departments</span>
+            </div>
+        </div>
+
+        <!-- Department Cards Grid -->
+        <div class="dept-grid">
+            {% for dept in monthly_departments %}
+                <a href="{% url 'department_month_detail' dept.id month year %}" class="dept-card" data-dept-name="{{ dept.name }}">
+                    <div class="icon-container" style="background: linear-gradient(135deg, #eef2ff, #e6f0ff);">
+                        <div class="icon-wrapper">
+                            <div class="dept-symbol">{{ dept.symbol|default:'🏥' }}</div>
+                        </div>
+                        <div class="month-indicator">
+                            <i class="fas fa-calendar-alt"></i> {{ month_name }}
+                        </div>
+                        <div class="count-badge">
+                            <i class="fas fa-users"></i> {{ dept.monthly_patients|default:0 }}
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <div class="dept-info">
+                            <h3>{{ dept.name }}</h3>
+
+                            <div class="dept-stats">
+                                <div class="dept-stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>{{ dept.monthly_patients|default:0 }}</span>
+                                </div>
+
+                                <div class="dept-stat">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>{{ dept.monthly_cured|default:0 }}</span>
+                                </div>
+
+                                <div class="dept-stat">
+                                    <i class="fas fa-user-md"></i>
+                                    <span>{{ dept.doctors|default:0 }}</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-hospital"></i>
+                    <p>No department activity found for {{ month_name }} {{ year }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pie Chart Modal -->
+    <div id="chartModal" class="modal-overlay" onclick="closeModalOnBackdrop(event)">
+        <div class="chart-modal">
+            <div class="chart-modal-header">
+                <h3><i class="fas fa-chart-pie"></i> Department Distribution - {{ month_name }} {{ year }}</h3>
+                <button class="modal-close" onclick="closeChartModal()">×</button>
+            </div>
+            <div class="chart-modal-body">
+                <div class="chart-container">
+                    <canvas id="deptPieChart"></canvas>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Department icon mapping based on department name
+        const departmentIcons = {
+            "Anaesthesiology": "💉", "Anesthesiology": "💉", "Bariatrics": "⚖️",
+            "Cardiothoracic Surgery": "🫀", "Dentistry": "🦷", "Dental": "🦷",
+            "General Surgery": "🔪", "Neurosurgery": "🧠", "Obstetrics & Gynecology": "🤰",
+            "Obstetrics": "🤰", "Gynecology": "🤰", "Ophthalmology": "👁️",
+            "Orthopedics": "🦴", "Plastic Surgery": "🦋", "Transplant Medicine": "🔄",
+            "Urology": "🧂", "Vascular Surgery": "🩸", "Cardiology": "❤️",
+            "Dermatology": "🧴", "Endocrinology": "⚡", "Family Medicine": "👪",
+            "Gastroenterology": "🫁", "General Medicine": "🏥", "Geriatrics": "👴",
+            "Infectious Diseases": "🦠", "Internal Medicine": "💊", "Nephrology": "🫘",
+            "Neurology": "🧠", "Oncology": "🎗️", "Pulmonology": "🫁", "Rheumatology": "🤲",
+            "Biochemistry": "🧪", "Blood Bank": "🩸", "Genetics": "🧬", "Microbiology": "🔬",
+            "Nuclear Medicine": "☢️", "Pathology": "🔍", "Radiology & Imaging": "📡",
+            "Radiology": "📡", "Imaging": "📡", "Cosmetology": "✨", "Dietetics & Nutrition": "🥗",
+            "Pain & Rehabilitation": "💆", "Palliative Care": "🕊️", "Physiotherapy": "🏃",
+            "Psychiatry": "🧘", "Psychology": "💭", "Speech Therapy": "🗣️", "Occupational Therapy": "✍️",
+            "Neonatology": "👶", "Pediatrics": "🧸", "Critical Care": "🆘", "Critical Care (ICU)": "🆘",
+            "ICU": "🆘", "Emergency Medicine": "🚑", "Emergency": "🚑", "ENT": "👂",
+            "Reproductive Medicine": "🥚", "IVF": "🥚", "default": "🏥"
+        };
+
+        const getGradientColors = (deptName) => {
+            const surgical = ["Anaesthesiology", "Anesthesiology", "Bariatrics", "Cardiothoracic Surgery", "Dentistry", "General Surgery", "Neurosurgery", "Obstetrics", "Gynecology", "Ophthalmology", "Orthopedics", "Plastic Surgery", "Transplant Medicine", "Urology", "Vascular Surgery", "ENT"];
+            const medical = ["Cardiology", "Dermatology", "Endocrinology", "Family Medicine", "Gastroenterology", "General Medicine", "Geriatrics", "Infectious Diseases", "Internal Medicine", "Nephrology", "Neurology", "Oncology", "Pulmonology", "Rheumatology"];
+            const diagnostic = ["Biochemistry", "Blood Bank", "Genetics", "Microbiology", "Nuclear Medicine", "Pathology", "Radiology", "Imaging"];
+            const pediatric = ["Neonatology", "Pediatrics"];
+            const emergency = ["Critical Care", "ICU", "Emergency Medicine", "Emergency"];
+            
+            if (surgical.some(s => deptName.includes(s))) return { start: "#fee8e8", end: "#fcc7c7" };
+            if (medical.some(m => deptName.includes(m))) return { start: "#e8f0fe", end: "#b8d1fc" };
+            if (diagnostic.some(d => deptName.includes(d))) return { start: "#e0f2f1", end: "#b2dfdb" };
+            if (pediatric.some(p => deptName.includes(p))) return { start: "#fff9c4", end: "#fff59d" };
+            if (emergency.some(e => deptName.includes(e))) return { start: "#ffebee", end: "#ffcdd2" };
+            return { start: "#eef2ff", end: "#e6f0ff" };
+        };
+
+        function setDepartmentIcons() {
+            const cards = document.querySelectorAll('.dept-card');
+            cards.forEach(card => {
+                const deptNameElement = card.querySelector('.dept-info h3');
+                if (deptNameElement) {
+                    const deptName = deptNameElement.textContent.trim();
+                    const symbolElement = card.querySelector('.dept-symbol');
+                    const iconContainer = card.querySelector('.icon-container');
+                    let icon = departmentIcons[deptName] || departmentIcons.default;
+                    if (!departmentIcons[deptName]) {
+                        for (const [key, value] of Object.entries(departmentIcons)) {
+                            if (deptName.includes(key) && key !== "default") { icon = value; break; }
+                        }
+                    }
+                    if (symbolElement) symbolElement.textContent = icon;
+                    const colors = getGradientColors(deptName);
+                    if (iconContainer) iconContainer.style.background = `linear-gradient(135deg, ${colors.start}, ${colors.end})`;
+                }
+            });
+        }
+
+        // Chart Modal Functions
+        let pieChart = null;
+
+        function openChartModal() {
+            const modal = document.getElementById('chartModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadChart();
+        }
+
+        function closeChartModal() {
+            const modal = document.getElementById('chartModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target === event.currentTarget) {
+                closeChartModal();
+            }
+        }
+
+        function loadChart() {
+            const deptData = [
+                {% for dept in monthly_departments %}
+                    { name: "{{ dept.name }}", patients: {{ dept.monthly_patients|default:0 }}, cured: {{ dept.monthly_cured|default:0 }} },
+                {% endfor %}
+            ];
+
+            if (deptData.length === 0) return;
+
+            const labels = deptData.map(d => d.name);
+            const patientsData = deptData.map(d => d.patients);
+            
+            const colors = ['#4f46e5', '#2563eb', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec489a', '#14b8a6', '#f97316', '#6366f1', '#3b82f6', '#a855f7', '#eab308', '#22c55e'];
+
+            const ctx = document.getElementById('deptPieChart').getContext('2d');
+            
+            if (pieChart) pieChart.destroy();
+            
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: patientsData,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} patients (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const legendContainer = document.getElementById('chartLegend');
+            legendContainer.innerHTML = '';
+            labels.forEach((label, index) => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `
+                    <div class="legend-color" style="background: ${colors[index % colors.length]}"></div>
+                    <span>${label}: ${patientsData[index]} patients</span>
+                `;
+                legendContainer.appendChild(legendItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setDepartmentIcons();
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeChartModal();
+        });
+    </script>
+</body>
+</html>

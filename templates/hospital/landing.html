@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTrack - Patient Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-btn {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(to right, #4f46e5, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-slider {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slide-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(49, 46, 129, 0.9), rgba(30, 58, 138, 0.8), rgba(14, 116, 144, 0.7));
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.75rem;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: white;
+            width: 2rem;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            text-align: center;
+        }
+
+        .hero-subtitle {
+            color: #a5f3fc;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+
+        .hero-btn {
+            padding: 1rem 2.5rem;
+            background: white;
+            color: #4338ca;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 1.125rem;
+            cursor: pointer;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .hero-btn:hover {
+            background: #ecfeff;
+            transform: scale(1.05);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 1.5rem;
+            background: white;
+        }
+
+        .section-container {
+            max-width: 80rem;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-subtitle {
+            color: #4f46e5;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-description {
+            color: #64748b;
+            font-size: 1.125rem;
+            max-width: 48rem;
+            margin: 0 auto;
+            line-height: 1.75;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Google Play Store Style Cards */
+        .feature-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.2);
+            border-color: #c7d2fe;
+        }
+
+        .feature-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .feature-content {
+            padding: 1.5rem;
+        }
+
+        .feature-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-text {
+            color: #64748b;
+            line-height: 1.75;
+            font-size: 0.9375rem;
+        }
+
+        /* Services Section with Auto-Sliding Marquee - Responsive */
+        .services {
+            padding: 6rem 1.5rem;
+            background: linear-gradient(135deg, #eef2ff 0%, #eff6ff 50%, #ecfeff 100%);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .slider-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .slider-container::before,
+        .slider-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 100px;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .slider-container::before {
+            left: 0;
+            background: linear-gradient(to right, #eef2ff, transparent);
+        }
+
+        .slider-container::after {
+            right: 0;
+            background: linear-gradient(to left, #eef2ff, transparent);
+        }
+
+        .slider-track {
+            display: flex;
+            gap: 1.5rem;
+            animation: scrollDesktop 30s linear infinite;
+            width: max-content;
+            padding: 1rem 0;
+        }
+
+        .slider-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollDesktop {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-300px * 4 - 1.5rem * 4));
+            }
+        }
+
+        .service-card {
+            flex: 0 0 300px;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            z-index: 1;
+        }
+
+        .service-card:nth-child(1)::before,
+        .service-card:nth-child(5)::before {
+            background: linear-gradient(to right, #4338ca, #4f46e5);
+        }
+
+        .service-card:nth-child(2)::before,
+        .service-card:nth-child(6)::before {
+            background: linear-gradient(to right, #1d4ed8, #2563eb);
+        }
+
+        .service-card:nth-child(3)::before {
+            background: linear-gradient(to right, #0891b2, #06b6d4);
+        }
+
+        .service-card:nth-child(4)::before {
+            background: linear-gradient(to right, #7c3aed, #8b5cf6);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.2);
+            border-color: #c7d2fe;
+        }
+
+        .service-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .service-content {
+            padding: 1.5rem;
+        }
+
+        .service-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-text {
+            color: #64748b;
+            line-height: 1.75;
+            font-size: 0.9375rem;
+        }
+
+        /* Tablet Devices */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            @keyframes scrollTablet {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(calc(-260px * 4 - 1.5rem * 4));
+                }
+            }
+            
+            .slider-track {
+                animation: scrollTablet 25s linear infinite;
+            }
+            
+            .service-card {
+                flex: 0 0 260px;
+            }
+        }
+
+        /* Mobile Devices */
+        @media (max-width: 768px) {
+            .services {
+                padding: 4rem 1rem;
+            }
+            
+            .slider-container::before,
+            .slider-container::after {
+                width: 50px;
+            }
+            
+            .slider-track {
+                gap: 1rem;
+                animation: scrollMobile 20s linear infinite;
+            }
+            
+            @keyframes scrollMobile {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(calc(-220px * 4 - 1rem * 4));
+                }
+            }
+            
+            .service-card {
+                flex: 0 0 200px;
+            }
+            
+            .service-image {
+                height: 150px;
+            }
+            
+            .service-content {
+                padding: 1rem;
+            }
+            
+            .service-title {
+                font-size: 1rem;
+            }
+            
+            .service-text {
+                font-size: 0.8125rem;
+                line-height: 1.5;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .slider-track {
+                gap: 0.75rem;
+                animation: scrollSmall 18s linear infinite;
+            }
+            
+            @keyframes scrollSmall {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(calc(-160px * 4 - 0.75rem * 4));
+                }
+            }
+            
+            .service-card {
+                flex: 0 0 160px;
+            }
+            
+            .service-image {
+                height: 120px;
+            }
+            
+            .service-content {
+                padding: 0.75rem;
+            }
+            
+            .service-title {
+                font-size: 0.875rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .service-text {
+                font-size: 0.75rem;
+            }
+            
+            .slider-container::before,
+            .slider-container::after {
+                width: 30px;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #312e81 0%, #1e3a8a 50%, #0f172a 100%);
+            color: white;
+            padding: 4rem 1.5rem;
+        }
+
+        .footer-container {
+            max-width: 80rem;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #a5f3fc, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-text {
+            color: #bfdbfe;
+            line-height: 1.75;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-heading {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: #bfdbfe;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #67e8f9;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            padding-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            color: #93c5fd;
+            font-size: 0.875rem;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-bottom-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #67e8f9;
+        }
+
+        /* Professional Medical Login Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 32rem;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: modalSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Medical-Themed Header */
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            padding: 2.5rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative medical pattern */
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 300;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(90deg);
+        }
+
+        .modal-header-content {
+            position: relative;
+            z-index: 5;
+        }
+
+        .modal-icon-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-icon-pulse {
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .modal-brand {
+            flex: 1;
+        }
+
+        .modal-brand-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-brand-tagline {
+            color: #bfdbfe;
+            font-size: 0.875rem;
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            color: #dbeafe;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            background: white;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f0fdf4;
+            color: #15803d;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border: 1px solid #bbf7d0;
+        }
+
+        .security-icon {
+            width: 16px;
+            height: 16px;
+            background: #15803d;
+            border-radius: 50%;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            background: white;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 1.5rem;
+        }
+
+        .forgot-password button {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+        }
+
+        .forgot-password button:hover {
+            color: #1d4ed8;
+            text-decoration-color: #1d4ed8;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .back-btn {
+            flex: 1;
+            padding: 1rem;
+            background: white;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .reset-btn {
+            flex: 2;
+        }
+
+        .modal-footer {
+            background: #f8fafc;
+            padding: 1.25rem 2rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .modal-footer-text {
+            color: #64748b;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                margin: 1rem;
+            }
+
+            .modal-header {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">MedTrack</div>
+            <button class="login-btn" onclick="openModal()">Login</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-slider">
+            <div class="slide active">
+                <img src="https://images.unsplash.com/photo-1764885517847-79d62138cc58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3NwaXRhbCUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzczNDYwODY1fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Modern Hospital Technology">
+                <div class="slide-overlay"></div>
+            </div>
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1758691462848-ba1e929da259?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwcHJvZmVzc2lvbmFsJTIwY29tcHV0ZXJ8ZW58MXx8fHwxNzczNDYzNTQ4fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Medical Professional">
+                <div class="slide-overlay"></div>
+            </div>
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1740908900846-4bbd4f22c975?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGhjYXJlJTIwZGF0YSUyMGFuYWx5dGljc3xlbnwxfHx8fDE3NzM0NjM1NDl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Healthcare Analytics">
+                <div class="slide-overlay"></div>
+            </div>
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1770221797869-81e508282ac4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwdGVhbSUyMGNvbGxhYm9yYXRpb258ZW58MXx8fHwxNzczNDYzNTUwfDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Medical Team">
+                <div class="slide-overlay"></div>
+            </div>
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=2000&q=80" alt="Digital Healthcare Records">
+                <div class="slide-overlay"></div>
+            </div>
+
+            <div class="slider-dots">
+                <span class="dot active" onclick="goToSlide(0)"></span>
+                <span class="dot" onclick="goToSlide(1)"></span>
+                <span class="dot" onclick="goToSlide(2)"></span>
+                <span class="dot" onclick="goToSlide(3)"></span>
+                <span class="dot" onclick="goToSlide(4)"></span>
+            </div>
+        </div>
+
+        <div class="hero-content">
+            <p class="hero-subtitle">Caring For Life</p>
+            <h1 class="hero-title">Leading the Way in<br>Medical Excellence</h1>
+            <button class="hero-btn" onclick="openModal()">Explore Our Services</button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="section-container">
+            <div class="section-header">
+                <p class="section-subtitle">Why Choose Us</p>
+                <p class="section-description">
+                    This patient management system stores every patient record digitally — past prescriptions, lab reports, billing history — accessible in one tap from any device. Cloud-based and secure, it replaces paper files with an unlimited, searchable patient database.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1723014563370-fb62697ae0e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwcmVjb3JkcyUyMGRhdGFiYXNlfGVufDF8fHx8MTc3MzQ2NDIxN3ww&ixlib=rb-4.1.0&q=80&w=1080" alt="Patient Records" class="feature-image">
+                    <div class="feature-content">
+                        <h3 class="feature-title">No data limits</h3>
+                        <p class="feature-text">
+                            Store unlimited patients.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1773236643761-28582f02dce0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGhjYXJlJTIwc2VjdXJpdHklMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzQ2NDIxOHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Security" class="feature-image">
+                    <div class="feature-content">
+                        <h3 class="feature-title">E-mail communication</h3>
+                        <p class="feature-text">
+                            we share data to patient insurance companies, to other hospital doctors, patient working firm etc.. with single click
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1560306990-18fa759c8713?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3NwaXRhbCUyMHJlYWwlMjB0aW1lJTIwbW9uaXRvcmluZ3xlbnwxfHx8fDE3NzM0NjQyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Real-Time Access" class="feature-image">
+                    <div class="feature-content">
+                        <h3 class="feature-title">Find any patient instantly</h3>
+                        <p class="feature-text">
+                            Search by name, mobile, or date. Full history in one tap.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section with Auto-Sliding Marquee -->
+   <section class="services">
+    <div class="section-container">
+        <div class="section-header">
+            <p class="section-subtitle">Our Services</p>
+            <h2 class="section-title">Complete Patient Management Solutions</h2>
+            <p class="section-description">
+                Everything you need to manage patient data efficiently and securely, from admission to discharge and beyond.
+            </p>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-track">
+                <!-- Card 1: Digital Health Records -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1691934310598-27528df21f9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVjdHJvbmljJTIwaGVhbHRoJTIwcmVjb3Jkc3xlbnwxfHx8fDE3NzM0NjQyMTl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Digital Health Records" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Digital Health Records</h3>
+                        <p class="service-text">Maintain complete electronic health records with easy search and retrieval capabilities.</p>
+                    </div>
+                </div>
+                
+                <!-- Card 2: Document Attachment -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1691934286085-c88039d93dae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwZG9jdW1lbnRzJTIwZGlnaXRhbHxlbnwxfHx8fDE3NzM0NjQyMTl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Document Attachment" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Document Attachment</h3>
+                        <p class="service-text">Upload and attach medical reports, prescriptions, lab results, and imaging files securely.</p>
+                    </div>
+                </div>
+                
+                <!-- Card 3: Find Any Patient Instantly (New) -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Patient Search" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Find Any Patient Instantly</h3>
+                        <p class="service-text">Search by name, mobile, or date. Full history in one tap.</p>
+                    </div>
+                </div>
+                
+                <!-- Card 4: Digital Patient Records (New) -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Digital Patient Records" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Digital Patient Records</h3>
+                        <p class="service-text">Store every patient record digitally — past prescriptions, lab reports, billing history.</p>
+                    </div>
+                </div>
+                
+                <!-- Duplicate cards for seamless loop -->
+                <!-- Card 1 Duplicate -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1691934310598-27528df21f9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVjdHJvbmljJTIwaGVhbHRoJTIwcmVjb3Jkc3xlbnwxfHx8fDE3NzM0NjQyMTl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Digital Health Records" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Digital Health Records</h3>
+                        <p class="service-text">Maintain complete electronic health records with easy search and retrieval capabilities.</p>
+                    </div>
+                </div>
+                
+                <!-- Card 2 Duplicate -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1691934286085-c88039d93dae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwZG9jdW1lbnRzJTIwZGlnaXRhbHxlbnwxfHx8fDE3NzM0NjQyMTl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Document Attachment" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Document Attachment</h3>
+                        <p class="service-text">Upload and attach medical reports, prescriptions, lab results, and imaging files securely.</p>
+                    </div>
+                </div>
+                
+                <!-- Card 3 Duplicate -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Patient Search" class="service-image">
+                    <div class="service-content">
+                        <h3 class="service-title">Find Any Patient Instantly</h3>
+                        <p class="service-text">Search by name, mobile, or date. Full history in one tap.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">MedTrack</div>
+                    <p class="footer-text">
+                        Leading the way in medical excellence with comprehensive patient data management solutions for modern healthcare facilities.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Services</a></li>
+                        <li><a href="#">Doctors</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Our Services</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Patient Records</a></li>
+                        <li><a href="#">Document Management</a></li>
+                        <li><a href="#">Appointment Scheduling</a></li>
+                        <li><a href="#">Treatment Tracking</a></li>
+                        <li><a href="#">Analytics & Reports</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Contact Us</h4>
+                    <ul class="footer-links">
+                        <li>123 Medical Center Drive</li>
+                        <li>Healthcare City, HC 12345</li>
+                        <li style="color: #67e8f9;">(555) 123-4567</li>
+                        <li style="color: #67e8f9;">info@medtrack.com</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 MedTrack. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">HIPAA Compliance</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Professional Medical Login Modal -->
+    <div id="loginModal" class="modal-overlay" onclick="closeModalOnBackdrop(event)">
+        <div class="modal">
+            <!-- Medical-Themed Header -->
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal()">×</button>
+                
+                <div class="modal-header-content">
+                    <div class="modal-icon-wrapper">
+                        <div class="modal-icon">
+                            <div class="modal-icon-pulse"></div>
+                        </div>
+                        <div class="modal-brand">
+                            <div class="modal-brand-name">MedTrack</div>
+                            <div class="modal-brand-tagline">Patient Management System</div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="modal-title" id="modalTitle">Secure Access Portal</h3>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">
+                            Username <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-input" id="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            Password <span class="required">*</span>
+                        </label>
+                        <input type="password" class="form-input" id="password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="forgot-password">
+                        <button type="button" onclick="showForgotPassword()">Forgot Password?</button>
+                    </div>
+                    <button type="submit" class="submit-btn">Sign In</button>
+                </form>
+
+                <form id="forgotPasswordForm" class="hidden" onsubmit="handleForgotPassword(event)">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Email Address <span class="required">*</span>
+                        </label>
+                        <input type="email" class="form-input" placeholder="Enter your registered email" required>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" class="back-btn" onclick="showLoginForm()">Back</button>
+                        <button type="submit" class="submit-btn reset-btn">Send Reset Link</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Slider Functionality
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        let slideInterval;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                dots[i].classList.remove('active');
+            });
+
+            if (index >= slides.length) {
+                currentSlide = 0;
+            } else if (index < 0) {
+                currentSlide = slides.length - 1;
+            } else {
+                currentSlide = index;
+            }
+
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+            resetInterval();
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        // Auto-slide every 5 seconds
+        slideInterval = setInterval(nextSlide, 5000);
+
+        // Modal Functionality
+        function openModal() {
+            document.getElementById('loginModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            showLoginForm();
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        function showForgotPassword() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('forgotPasswordForm').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Password Recovery';
+        }
+
+        function showLoginForm() {
+            document.getElementById('forgotPasswordForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Secure Access Portal';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            fetch("/login/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.error);
+                }
+            });
+        }
+
+
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        function handleForgotPassword(event) {
+            event.preventDefault();
+            alert('Password reset link will be sent to your email');
+            showLoginForm();
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

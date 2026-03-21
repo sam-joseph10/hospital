@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Department Patients Summary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- html2pdf for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+            overflow-x: hidden;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1e3a8a;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 180px;
+            border-radius: 16px;
+            box-shadow: 0 20px 35px -10px rgba(18, 52, 106, 0.3);
+            border: 1px solid #e0ecff;
+            z-index: 100;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content:hover {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            background: transparent;
+        }
+
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .dropdown-content a i {
+            width: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown:hover .dropdown-trigger i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.4rem 1.2rem 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d9e6ff;
+            box-shadow: 0 3px 10px rgba(0,35,70,0.05);
+            font-weight: 500;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .hospital-selector i {
+            color: #2563eb;
+            font-size: 1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Page Container */
+        .page-container {
+            max-width: 90rem;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: #0c2647;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-left h1 i {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 0.5rem;
+        }
+
+        .dept-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: white;
+            padding: 0.6rem 1.8rem;
+            border-radius: 100px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
+        }
+
+        .dept-info-bar i {
+            color: #4f46e5;
+        }
+
+        .dept-info-bar span {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Professional Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .btn-excel {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-excel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-excel:hover::before {
+            left: 100%;
+        }
+
+        .btn-excel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-pdf {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-pdf::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-pdf:hover::before {
+            left: 100%;
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-back {
+            background: white;
+            color: #4f46e5;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-back:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.15);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-header h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-header h3 i {
+            color: #4f46e5;
+        }
+
+        .column-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .column-selector label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: #1e293b;
+            cursor: pointer;
+            padding: 0.4rem 1rem;
+            background: #f8fafc;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .column-selector label:hover {
+            background: #eef2ff;
+            border-color: #4f46e5;
+        }
+
+        .column-selector input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #4f46e5;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .filter-actions .btn {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.85rem;
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .filter-actions .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: white;
+            border: none;
+        }
+
+        /* Department and Date Range */
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .dept-dropdown {
+            position: relative;
+            min-width: 250px;
+            flex: 2;
+        }
+
+        .dept-dropdown select {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            appearance: none;
+            background: #f8fcff;
+            border: 2px solid #d0e2ff;
+            border-radius: 60px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1a3b6e;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .dept-dropdown select:hover, .dept-dropdown select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+
+        .dept-dropdown i {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #2563eb;
+            pointer-events: none;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 1rem;
+            flex: 3;
+            flex-wrap: wrap;
+        }
+
+        .date-input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .date-input label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .date-input input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid #d0e2ff;
+            border-radius: 60px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+            background: #f8fcff;
+        }
+
+        .date-input input:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+
+        .filter-btn .btn {
+            padding: 0.7rem 2rem;
+            margin-bottom: 0;
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: white;
+            border: none;
+        }
+
+        .filter-btn .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Table Container */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Inter', sans-serif;
+            min-width: 600px;
+        }
+
+        th {
+            text-align: left;
+            padding: 1.2rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            background: #f8fafc;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-cured {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-not-cured {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats-info {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .stat-box i {
+            color: #4f46e5;
+            margin-right: 0.3rem;
+        }
+
+        .stat-box span {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Active filter badge */
+        .active-filter-badge {
+            background: #eef2ff;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #4f46e5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .active-filter-badge i {
+            cursor: pointer;
+        }
+
+        /* PDF Export Specific Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .navbar, .filter-section, .filter-row, .header-actions, .filter-actions, .active-filter-badge {
+                display: none !important;
+            }
+            
+            .page-container {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+            
+            .page-header {
+                margin-bottom: 1rem;
+                padding: 0;
+            }
+            
+            .dept-info-bar {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                padding: 0.5rem 1rem;
+            }
+            
+            .stats-row {
+                margin-bottom: 1rem;
+            }
+            
+            .table-container {
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+                margin: 0;
+                overflow-x: visible;
+            }
+            
+            table {
+                min-width: 100%;
+                font-size: 9pt;
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 0.5rem;
+                border: 1px solid #e2e8f0;
+                word-wrap: break-word;
+                white-space: normal;
+            }
+            
+            .status-badge {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+                display: inline-block;
+                padding: 0.2rem 0.6rem;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .column-selector {
+                width: 100%;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .date-range {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+                padding: 0.8rem 1.5rem;
+            }
+            
+            .nav-right {
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .nav-links {
+                flex: 1;
+                justify-content: flex-start;
+            }
+            
+            .page-container {
+                padding: 0 1.5rem;
+                margin: 1.5rem auto;
+            }
+            
+            .column-selector label {
+                flex: 1 1 calc(50% - 0.5rem);
+            }
+            
+            .stats-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .date-range {
+                flex-direction: column;
+            }
+            
+            .header-actions {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                padding: 0.5rem 0.8rem;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .nav-right {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                width: auto;
+                justify-content: flex-end;
+            }
+            
+            .nav-links {
+                flex: none;
+                width: auto;
+            }
+            
+            .dropdown-trigger.nav-item {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            
+            .hospital-selector {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            
+            .page-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .dept-info-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                border-radius: 16px;
+                width: 100%;
+            }
+            
+            .column-selector label {
+                flex: 1 1 100%;
+            }
+            
+            .filter-actions {
+                flex-direction: column;
+            }
+            
+            .filter-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stats-info {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            
+            .stat-box {
+                width: 100%;
+            }
+            
+            .filter-btn .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'viewer_dashboard' %}" class="logo">MedTrack</a>
+            
+            <div class="nav-right">
+                <div class="nav-links">
+                    <div class="dropdown">
+                        <div class="dropdown-trigger nav-item">
+                            <div class="hospital-selector">
+                                <i class="fas fa-hospital"></i>
+                                <span>{{ hospital_name|default:"" }}</span> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-left">
+                <h1>
+                    <i class="fas fa-users"></i> 
+                    Department Patients
+                </h1>
+                <div class="dept-info-bar">
+                    <i class="fas fa-calendar-alt" style="margin-left: 0.5rem;"></i>
+                    <span id="currentDateDisplay"></span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-excel" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button class="btn btn-pdf" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <a href="#" class="btn btn-back" onclick="history.back(); return false;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="filter-row">
+            <div class="dept-dropdown">
+                <select id="departmentSelect" onchange="applyDateFilter()">
+                    <option value="all">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.name }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+
+            <div class="date-range">
+                <div class="date-input">
+                    <label><i class="fas fa-calendar-alt"></i> From Date</label>
+                    <input type="date" id="fromDate" onchange="applyDateFilter()">
+                </div>
+                <div class="date-input">
+                    <label><i class="fas fa-calendar-alt"></i> To Date</label>
+                    <input type="date" id="toDate" onchange="applyDateFilter()">
+                </div>
+            </div>
+
+            <div class="filter-btn">
+                <button class="btn" onclick="applyDateFilter()">
+                    <i class="fas fa-filter"></i> Apply Filter
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Filter Display -->
+        <div id="activeFilter" class="active-filter-badge" style="display: none;">
+            <span id="filterText"></span>
+            <i class="fas fa-times" onclick="clearDateFilter()"></i>
+        </div>
+
+        <!-- Filter Section - Column Selector -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>
+                    <i class="fas fa-table"></i>
+                    Select Columns to Display
+                </h3>
+            </div>
+
+            <div class="column-selector">
+                <label>
+                    <input type="checkbox" id="colId" checked onchange="updateTableColumns()">
+                    Patient ID
+                </label>
+                <label>
+                    <input type="checkbox" id="colName" checked onchange="updateTableColumns()">
+                    Patient Name
+                </label>
+                <label>
+                    <input type="checkbox" id="colGender" checked onchange="updateTableColumns()">
+                    Gender
+                </label>
+                <label>
+                    <input type="checkbox" id="colDepartment" checked onchange="updateTableColumns()">
+                    Department
+                </label>
+                <label>
+                    <input type="checkbox" id="colDoctor" checked onchange="updateTableColumns()">
+                    Consulting Doctor
+                </label>
+                <label>
+                    <input type="checkbox" id="colDiagnosis" checked onchange="updateTableColumns()">
+                    Diagnosis
+                </label>
+                <label>
+                    <input type="checkbox" id="colJoinDate" checked onchange="updateTableColumns()">
+                    Joining Date
+                </label>
+                <label>
+                    <input type="checkbox" id="colDischargeDate" checked onchange="updateTableColumns()">
+                    Discharge Date
+                </label>
+                <label>
+                    <input type="checkbox" id="colStatus" checked onchange="updateTableColumns()">
+                    Status
+                </label>
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn" onclick="selectAllColumns()">
+                    <i class="fas fa-check-double"></i> Select All
+                </button>
+                <button class="btn" onclick="deselectAllColumns()">
+                    <i class="fas fa-times"></i> Deselect All
+                </button>
+                <button class="btn btn-primary" onclick="resetToDefault()">
+                    <i class="fas fa-undo"></i> Reset to Default
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stats-info">
+                <div class="stat-box">
+                    <i class="fas fa-users"></i>
+                    <span id="totalPatients">0</span> Total Patients
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-check-circle" style="color:#15803d;"></i>
+                    <span id="curedPatients">0</span> Cured
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-file-medical"></i>
+                <span id="displayCount">0</span> Records Displayed
+            </div>
+        </div>
+
+        <!-- Patients Table -->
+        <div class="table-container">
+            <table id="patientTable">
+                <thead id="tableHeader">
+                    <tr id="headerRow">
+                        <!-- Headers will be dynamically added -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="9" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading patients...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pass data from Django to JavaScript -->
+    {{ patients_json|json_script:"patients-data" }}
+
+    <script>
+        (function() {
+            // Load patient data
+            let allPatients = [];
+            try {
+                const raw = document.getElementById('patients-data').textContent;
+                allPatients = JSON.parse(raw);
+                console.log(`✅ Loaded ${allPatients.length} patients from backend`);
+            } catch (e) {
+                console.error('❌ Failed to parse patients JSON:', e);
+                allPatients = [];
+            }
+
+            window.allPatients = allPatients;
+            window.currentPatients = [...allPatients];
+
+            // Column definitions
+            const columns = [
+                { id: 'id', label: 'Patient ID', property: 'id' },
+                { id: 'name', label: 'Patient Name', property: 'name' },
+                { id: 'gender', label: 'Gender', property: 'gender' },
+                { id: 'department', label: 'Department', property: 'department' },
+                { id: 'doctor', label: 'Consulting Doctor', property: 'doctor' },
+                { id: 'diagnosis', label: 'Diagnosis', property: 'diagnosis' },
+                { id: 'joinDate', label: 'Joining Date', property: 'joinDate' },
+                { id: 'dischargeDate', label: 'Discharge Date', property: 'dischargeDate' },
+                { id: 'status', label: 'Status', property: 'status' }
+            ];
+
+            function renderCell(patient, colId) {
+                const value = patient[colId];
+                if (colId === 'id') {
+                    return `<span style="font-family: monospace; font-weight:600;">${value || '—'}</span>`;
+                } else if (colId === 'status') {
+                    let statusClass = 'status-not-cured';
+                    let statusText = 'Not cured';
+                    if (value === 'cured') { statusClass = 'status-cured'; statusText = 'Cured'; }
+                    else if (value === 'dead') { statusClass = 'status-not-cured'; statusText = 'Deceased'; }
+                    else if (value === 'shifted') { statusClass = 'status-not-cured'; statusText = 'Shifted'; }
+                    return `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                } else {
+                    return value || '—';
+                }
+            }
+
+            window.updateTableColumns = function() {
+                const headerRow = document.getElementById('headerRow');
+                let headerHtml = '';
+                columns.forEach(col => {
+                    const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                    if (checkbox && checkbox.checked) {
+                        headerHtml += `<th>${col.label}</th>`;
+                    }
+                });
+                if (headerHtml === '') {
+                    headerHtml = '<th>No columns selected</th>';
+                }
+                headerRow.innerHTML = headerHtml;
+
+                const tbody = document.getElementById('tableBody');
+                if (window.currentPatients.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="${headerRow.children.length}" class="empty-state">
+                                <i class="fas fa-user-slash"></i>
+                                <p>No patients found</p>
+                            </td>
+                        </tr>
+                    `;
+                    updateStats();
+                    return;
+                }
+
+                let bodyHtml = '';
+                window.currentPatients.forEach(p => {
+                    let rowHtml = `<tr style="cursor: pointer;" onclick="goToPatient('${p.id}')">`;
+                    columns.forEach(col => {
+                        const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                        if (checkbox && checkbox.checked) {
+                            rowHtml += `<td>${renderCell(p, col.id)}</td>`;
+                        }
+                    });
+                    rowHtml += '</tr>';
+                    bodyHtml += rowHtml;
+                });
+                tbody.innerHTML = bodyHtml;
+                updateStats();
+            };
+
+            window.goToPatient = function(id) {
+                window.location.href = `/viewer/patient/${id}/`;
+            };
+
+            function updateStats() {
+                const total = window.currentPatients.length;
+                const cured = window.currentPatients.filter(p => p.status === 'cured').length;
+                document.getElementById('totalPatients').textContent = total;
+                document.getElementById('curedPatients').textContent = cured;
+                document.getElementById('displayCount').textContent = total;
+            }
+
+            window.applyDateFilter = function() {
+                const fromDate = document.getElementById('fromDate').value;
+                const toDate = document.getElementById('toDate').value;
+                const deptName = document.getElementById('departmentSelect').value;
+
+                let filtered = [...allPatients];
+
+                if (deptName !== 'all') {
+                    filtered = filtered.filter(p => p.department === deptName);
+                }
+
+                if (fromDate || toDate) {
+                    filtered = filtered.filter(p => {
+                        if (!p.joinDate || p.joinDate === '—') return false;
+                        const join = p.joinDate;
+                        if (fromDate && toDate) return join >= fromDate && join <= toDate;
+                        if (fromDate) return join >= fromDate;
+                        if (toDate) return join <= toDate;
+                        return true;
+                    });
+
+                    const filterText = document.getElementById('filterText');
+                    let text = '';
+                    if (fromDate && toDate) text = `Filtered: ${fromDate} to ${toDate}`;
+                    else if (fromDate) text = `Filtered: From ${fromDate}`;
+                    else if (toDate) text = `Filtered: To ${toDate}`;
+                    if (deptName !== 'all') text = (text ? text + ' · ' : '') + `Department: ${deptName}`;
+                    filterText.textContent = text;
+                    document.getElementById('activeFilter').style.display = 'inline-flex';
+                } else if (deptName !== 'all') {
+                    document.getElementById('filterText').textContent = `Department: ${deptName}`;
+                    document.getElementById('activeFilter').style.display = 'inline-flex';
+                } else {
+                    document.getElementById('activeFilter').style.display = 'none';
+                }
+
+                window.currentPatients = filtered;
+                window.updateTableColumns();
+            };
+
+            window.clearDateFilter = function() {
+                document.getElementById('fromDate').value = '';
+                document.getElementById('toDate').value = '';
+                document.getElementById('departmentSelect').value = 'all';
+                document.getElementById('activeFilter').style.display = 'none';
+                window.currentPatients = [...allPatients];
+                window.updateTableColumns();
+            };
+
+            window.selectAllColumns = function() {
+                columns.forEach(col => {
+                    const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+                window.updateTableColumns();
+            };
+
+            window.deselectAllColumns = function() {
+                columns.forEach(col => {
+                    const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                    if (checkbox) checkbox.checked = false;
+                });
+                window.updateTableColumns();
+            };
+
+            window.resetToDefault = function() {
+                selectAllColumns();
+            };
+
+            // Excel Export
+            window.exportToExcel = function() {
+                const wsData = [];
+                const headers = [];
+                columns.forEach(col => {
+                    const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                    if (checkbox && checkbox.checked) headers.push(col.label);
+                });
+                wsData.push(headers);
+
+                window.currentPatients.forEach(p => {
+                    const row = [];
+                    columns.forEach(col => {
+                        const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                        if (checkbox && checkbox.checked) {
+                            if (col.id === 'status') {
+                                if (p.status === 'cured') row.push('Cured');
+                                else if (p.status === 'dead') row.push('Deceased');
+                                else if (p.status === 'shifted') row.push('Shifted');
+                                else row.push('Not cured');
+                            } else {
+                                row.push(p[col.property] || '');
+                            }
+                        }
+                    });
+                    wsData.push(row);
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Patients');
+                XLSX.writeFile(wb, `patients_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+            };
+
+            // PDF Export - Fixed to show all columns properly
+            window.exportToPDF = function() {
+                // Get current visible columns
+                const visibleColumns = [];
+                columns.forEach(col => {
+                    const checkbox = document.getElementById(`col${col.id.charAt(0).toUpperCase() + col.id.slice(1)}`);
+                    if (checkbox && checkbox.checked) {
+                        visibleColumns.push(col);
+                    }
+                });
+
+                // Create PDF content
+                const pdfContent = document.createElement('div');
+                pdfContent.style.padding = '20px';
+                pdfContent.style.fontFamily = 'Inter, sans-serif';
+                pdfContent.style.backgroundColor = 'white';
+                pdfContent.style.width = '100%';
+                
+                // Add header
+                const headerInfo = document.createElement('div');
+                headerInfo.style.marginBottom = '20px';
+                headerInfo.style.borderBottom = '2px solid #4f46e5';
+                headerInfo.style.paddingBottom = '15px';
+                headerInfo.innerHTML = `
+                    <h1 style="color: #1e293b; margin: 0 0 5px 0; font-size: 24px;">MedTrack - Department Patients Summary</h1>
+                    <p style="color: #64748b; margin: 5px 0; font-size: 12px;">Generated on: ${new Date().toLocaleString()}</p>
+                    <p style="color: #64748b; margin: 5px 0; font-size: 12px;">Total Patients: ${window.currentPatients.length} | Cured: ${window.currentPatients.filter(p => p.status === 'cured').length}</p>
+                `;
+                pdfContent.appendChild(headerInfo);
+                
+                // Create table
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.fontSize = '10pt';
+                table.style.border = '1px solid #e2e8f0';
+                
+                // Table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                visibleColumns.forEach(col => {
+                    const th = document.createElement('th');
+                    th.textContent = col.label;
+                    th.style.border = '1px solid #e2e8f0';
+                    th.style.padding = '10px 8px';
+                    th.style.backgroundColor = '#f8fafc';
+                    th.style.color = '#4f46e5';
+                    th.style.fontWeight = '600';
+                    th.style.textAlign = 'left';
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Table body
+                const tbody = document.createElement('tbody');
+                window.currentPatients.forEach(p => {
+                    const row = document.createElement('tr');
+                    visibleColumns.forEach(col => {
+                        const td = document.createElement('td');
+                        td.style.border = '1px solid #e2e8f0';
+                        td.style.padding = '8px';
+                        td.style.fontSize = '9pt';
+                        
+                        let value = p[col.property] || '—';
+                        if (col.id === 'status') {
+                            let statusText = 'Not cured';
+                            let bgColor = '#fee2e2';
+                            if (value === 'cured') { statusText = 'Cured'; bgColor = '#dcfce7'; }
+                            else if (value === 'dead') { statusText = 'Deceased'; bgColor = '#fef9c3'; }
+                            else if (value === 'shifted') { statusText = 'Shifted'; bgColor = '#dbeafe'; }
+                            td.innerHTML = `<span style="display: inline-block; padding: 4px 12px; border-radius: 20px; background: ${bgColor}; color: #1e293b; font-size: 9pt; font-weight: 500;">${statusText}</span>`;
+                        } else {
+                            td.textContent = value;
+                        }
+                        row.appendChild(td);
+                    });
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                pdfContent.appendChild(table);
+                
+                // Configure PDF
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `patients_summary_${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2, 
+                        letterRendering: true,
+                        useCORS: true,
+                        logging: false
+                    },
+                    jsPDF: { 
+                        unit: 'in', 
+                        format: 'a4', 
+                        orientation: 'landscape'
+                    }
+                };
+                
+                html2pdf().set(opt).from(pdfContent).save();
+            };
+
+            // Initial load
+            window.currentPatients = [...allPatients];
+            window.updateTableColumns();
+        })();
+
+        function formatDateLikeExample(date) {
+            const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const weekday = weekdays[date.getDay()];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            return `${weekday}, ${day} ${month} ${year}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateSpan = document.getElementById('currentDateDisplay');
+            if (dateSpan) {
+                dateSpan.textContent = formatDateLikeExample(new Date());
+            }
+        });
+    </script>
+</body>
+</html>

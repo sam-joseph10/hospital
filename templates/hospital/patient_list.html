@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+{% load humanize %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>MedTrack · Department Patients</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+            overflow-x: hidden;
+        }
+
+        /* ===== PROFESSIONAL NAVIGATION – MATCHING DASHBOARD STYLE ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(67, 97, 160, 0.2);
+            box-shadow: 0 4px 20px -8px rgba(0, 32, 94, 0.1);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.875rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4f46e5, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        /* nav links container – responsive */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1e3a8a;
+        }
+
+        /* ===== DROPDOWN STYLES ===== */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 180px;
+            border-radius: 16px;
+            box-shadow: 0 20px 35px -10px rgba(18, 52, 106, 0.3);
+            border: 1px solid #e0ecff;
+            z-index: 100;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content:hover {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 100%;
+            bottom: -20px;
+            left: 0;
+            background: transparent;
+        }
+
+        .dropdown-content a {
+            color: #1e293b;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .dropdown-content a i {
+            width: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+
+        .dropdown:hover .dropdown-trigger i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* hospital selector – compact and professional */
+        .hospital-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            padding: 0.4rem 1.2rem 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d9e6ff;
+            box-shadow: 0 3px 10px rgba(0,35,70,0.05);
+            font-weight: 500;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        .hospital-selector i {
+            color: #2563eb;
+            font-size: 1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Page Container - Responsive */
+        .page-container {
+            max-width: 90rem;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Header Section - Perfect Alignment */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: #0c2647;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 0.5rem;
+        }
+
+        .dept-info-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 0.6rem 1.8rem;
+            border-radius: 100px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
+        }
+
+        .dept-info-bar i {
+            color: #4f46e5;
+        }
+
+        .dept-info-bar span {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.9rem;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 2rem;
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+            border-radius: 100px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .back-link:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+
+        /* Search Section - Clean & Functional */
+        .search-section {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+            font-size: 1rem;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-wrapper input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-stats {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .clear-search {
+            color: #4f46e5;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            transition: all 0.2s;
+        }
+
+        .clear-search:hover {
+            background: #eef2ff;
+        }
+
+        /* Table Container - Perfect */
+        .table-container {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Inter', sans-serif;
+            min-width: 700px;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            background: #f8fafc;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-cured {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-not-cured {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-dead {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .status-shifted {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 0.8rem;
+            color: #cbd5e1;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #4f46e5;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+        @media (max-width: 900px) {
+            .navbar-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+                padding: 0.8rem 1.5rem;
+            }
+            .nav-right {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .nav-links {
+                flex: 1;
+                justify-content: flex-start;
+            }
+            .page-container {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                padding: 0.6rem 1rem;
+                gap: 0.5rem;
+            }
+            .logo {
+                font-size: 1.4rem;
+                white-space: nowrap;
+            }
+            .nav-right {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                width: auto;
+                justify-content: flex-end;
+            }
+            .nav-links {
+                flex: none;
+                width: auto;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+            .hospital-selector {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                margin: 0;
+            }
+            .dropdown-content {
+                right: 0;
+                left: auto;
+                min-width: 160px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .back-link {
+                width: 100%;
+                justify-content: center;
+            }
+            .dept-info-bar {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-container { 
+                padding: 0.5rem 0.8rem; 
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            .dropdown-trigger.nav-item {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .hospital-selector { 
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            .dropdown-content {
+                min-width: 140px;
+            }
+            .dropdown-content a {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            .page-container {
+                padding: 0 1rem;
+            }
+            .search-section {
+                padding: 1rem;
+            }
+            .search-wrapper input {
+                padding: 0.8rem 1rem 0.8rem 2.8rem;
+                font-size: 0.9rem;
+            }
+            th, td {
+                padding: 0.8rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* High-DPI Screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION - MATCHING DASHBOARD STYLE ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'viewer_dashboard' %}" class="logo">MedTrack</a>
+            
+            <div class="nav-right">
+                <div class="nav-links">
+                    <div class="dropdown">
+                        <div class="dropdown-trigger nav-item">
+                            <div class="hospital-selector">
+                                <i class="fas fa-hospital"></i>
+                                <span>{{ hospital_name }}</span> 
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="page-container">
+        <!-- Header with Back Link -->
+        <div class="page-header">
+            <div class="header-left">
+                <h1 id="pageTitle">
+                    <i class="fas fa-stethoscope"></i> 
+                    <span id="deptName">{{ department.name }}</span>
+                </h1>
+                <div class="dept-info-bar" id="deptInfoBar">
+                    <i class="fas fa-users"></i>
+                    <span id="patientCount">{{ total }}</span> Patients
+                    <i class="fas fa-check-circle" style="color:#15803d;"></i>
+                    <span id="curedCount">{{ cured }}</span> Cured
+                </div>
+            </div>
+            <a href="#" class="back-link" onclick="history.back(); return false;">
+                <i class="fas fa-arrow-left"></i> Back to Departments
+            </a>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by ID, name, doctor, diagnosis..." onkeyup="filterPatients()">
+            </div>
+            <div class="search-stats">
+                <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalCount">0</strong> patients</span>
+                <button class="clear-search" onclick="clearSearch()">Clear Search</button>
+            </div>
+        </div>
+
+        <!-- Patients Table -->
+        <div class="table-container">
+            <table id="patientTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Joined</th>
+                        <th>Discharge</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="8" class="loading">
+                            <i class="fas fa-spinner"></i> Loading patients...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Get Django data safely -->
+    {{ patients|json_script:"patients-data" }}
+
+    <script>
+        // ==================== LOAD DATA FROM DJANGO ====================
+        const patients = JSON.parse(
+            document.getElementById('patients-data').textContent
+        );
+
+        let currentPatients = patients;
+
+        // ==================== INITIAL LOAD ====================
+        window.onload = function () {
+            document.getElementById('totalCount').textContent = currentPatients.length;
+            renderTable(currentPatients);
+        };
+
+        // ==================== RENDER TABLE ====================
+        function renderTable(patientsList) {
+            const tbody = document.getElementById('tableBody');
+
+            if (patientsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-user-slash"></i>
+                            <p>No matching patients found</p>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('visibleCount').textContent = '0';
+                return;
+            }
+
+            let html = '';
+
+            patientsList.forEach(p => {
+                let statusClass = '';
+                let statusText = '';
+
+                if (p.status === 'cured') {
+                    statusClass = 'status-cured';
+                    statusText = 'Cured';
+                } else if (p.status === 'dead') {
+                    statusClass = 'status-dead';
+                    statusText = 'Deceased';
+                } else if (p.status === 'shifted') {
+                    statusClass = 'status-shifted';
+                    statusText = 'Shifted';
+                } else {
+                    statusClass = 'status-not-cured';
+                    statusText = 'Not cured';
+                }
+
+                html += `
+                    <tr onclick="goToPatient('${p.patient_id}')" style="cursor:pointer;">
+                        <td><span style="font-family: monospace; font-weight:600;">${p.patient_id}</span></td>
+                        <td>${p.name}</td>
+                        <td>${p.gender || '—'}</td>
+                        <td>${p.doctor}</td>
+                        <td>${p.diagnosis}</td>
+                        <td>${p.join_date}</td>
+                        <td>${p.discharge_date}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('visibleCount').textContent = patientsList.length;
+        }
+
+        // ==================== SEARCH FUNCTION ====================
+        function filterPatients() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            if (searchTerm === '') {
+                renderTable(currentPatients);
+                return;
+            }
+
+            const filtered = currentPatients.filter(p =>
+                String(p.patient_id).toLowerCase().includes(searchTerm) ||
+                p.name.toLowerCase().includes(searchTerm) ||
+                (p.gender && p.gender.toLowerCase().includes(searchTerm)) ||
+                p.doctor.toLowerCase().includes(searchTerm) ||
+                p.status.toLowerCase().includes(searchTerm) ||
+                (p.join_date && p.join_date.includes(searchTerm)) ||
+                p.diagnosis.toLowerCase().includes(searchTerm)
+            );
+
+            renderTable(filtered);
+        }
+
+        // ==================== CLEAR SEARCH ====================
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            renderTable(currentPatients);
+        }
+
+        // ==================== ROW CLICK ====================
+        function goToPatient(id) {
+            window.location.href = `/viewer/patient/${id}/`;
+        }
+
+        // ========== EXPOSE FUNCTIONS GLOBALLY ==========
+        window.filterPatients = filterPatients;
+        window.clearSearch = clearSearch;
+        window.goToPatient = goToPatient;
+    </script>
+</body>
+</html>
