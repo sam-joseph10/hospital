@@ -20,7 +20,11 @@ import calendar
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.forms import ValidationError
+from django.core.validators import validate_email
+import logging
 
+logger = logging.getLogger(__name__)
 def landing(request):
     return render(request, "landing.html")
 
@@ -338,12 +342,24 @@ def share_patient(request):
         data = json.loads(request.body)
         patient_id = data.get('patient_id')
         recipient_email = data.get('email')
-        subject = data.get('subject', '')
-        message = data.get('message', '')
+        subject = data.get('subject', '').strip()
+        message = data.get('message', '').strip()
 
         # Basic validation
         if not patient_id or not recipient_email:
-            return JsonResponse({'success': False, 'error': 'Patient ID and email are required.'}, status=400)
+            return JsonResponse(
+                {'success': False, 'error': 'Patient ID and email are required.'},
+                status=400
+            )
+
+        # Validate email format
+        try:
+            validate_email(recipient_email)
+        except ValidationError:
+            return JsonResponse(
+                {'success': False, 'error': 'Invalid email address.'},
+                status=400
+            )
 
         # Ensure the patient exists and belongs to the user's hospital
         try:
@@ -352,36 +368,35 @@ def share_patient(request):
                 hospital=request.user.hospital
             )
         except PatientVisit.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Patient not found.'}, status=404)
+            return JsonResponse(
+                {'success': False, 'error': 'Patient not found.'},
+                status=404
+            )
 
-        print(visit)
         # --- Build the email content ---
-        # You can include patient details from the `visit` object.
-        # Example: patient name, age, etc. (adjust according to your model fields)
-        
-        # --- Build patient details from the visit object ---
+        # Use getattr to safely handle missing fields (adjust field names as needed)
         patient_info = f"""
-Patient Name: {visit.patient_name}
+Patient Name: {getattr(visit, 'patient_name', 'N/A')}
 Patient ID: {visit.patient_id}
-Gender: {visit.gender if visit.gender else 'Not specified'}
-Date of Birth: {visit.date_of_birth if visit.date_of_birth else 'Not specified'}
-Phone: {visit.phone if visit.phone else 'Not provided'}
-Visit Date: {visit.visit_date}
-Diagnosis: {visit.diagnosis}
-Status: {visit.get_status_display()}
-Discharge Date: {visit.discharge_date}
+Gender: {getattr(visit, 'gender', 'Not specified')}
+Date of Birth: {getattr(visit, 'date_of_birth', 'Not specified')}
+Phone: {getattr(visit, 'phone', 'Not provided')}
+Visit Date: {getattr(visit, 'visit_date', 'N/A')}
+Diagnosis: {getattr(visit, 'diagnosis', 'N/A')}
+Status: {visit.get_status_display() if hasattr(visit, 'get_status_display') else 'N/A'}
+Discharge Date: {getattr(visit, 'discharge_date', 'N/A')}
         """
 
         full_message = f"{message}\n\n--- Patient Details ---\n{patient_info}"
 
-         # --- Send the email ---
-        print("HI")
-        # Ensure email settings are configured
+        # --- Prepare email ---
+        email_sent = False
+        email_error = None
+
         if not settings.DEFAULT_FROM_EMAIL:
             email_error = "Email from address is not configured."
         else:
             try:
-                # Create EmailMessage object
                 email = EmailMessage(
                     subject=subject,
                     body=full_message,
@@ -389,51 +404,52 @@ Discharge Date: {visit.discharge_date}
                     to=[recipient_email],
                 )
 
-                # Fetch all attachments for this visit
+                # Attach files
                 attachments = Attachment.objects.filter(visit=visit)
                 for attachment in attachments:
-                    try:
-                        # Check if file exists
-                        if attachment.file and os.path.exists(attachment.file.path):
-                            # Attach file using its path; Django will read the file
-                            email.attach_file(attachment.file.path)
-                        else:
-                            # Log missing file, but continue sending other attachments
-                            print(f"Attachment file missing: {attachment.file_name} (ID: {attachment.id})")
-                    except Exception as e:
-                        # Log error for this attachment but continue with others
-                        print(f"Error attaching file {attachment.file_name}: {str(e)}")
+                    if attachment.file and os.path.exists(attachment.file.path):
+                        email.attach_file(attachment.file.path)
+                    else:
+                        logger.warning(
+                            "Attachment file missing for attachment ID %s: %s",
+                            attachment.id, attachment.file_name
+                        )
 
-                # Send email
                 email.send(fail_silently=False)
                 email_sent = True
 
             except Exception as e:
                 email_error = str(e)
-                print(f"Failed to send email: {email_error}")
-        
-        # Create share record (subject/message can be stored as notes or ignored)
+                logger.exception("Failed to send email for visit %s", visit.id)
+
+        # --- Record the share attempt ---
+        # Only create share record if email was sent (or always, depending on requirements)
+        # Here we create it regardless, but we store the outcome.
         share = SharedReport.objects.create(
             visit=visit,
             shared_email=recipient_email,
             shared_by=request.user,
-            subject=subject,
-            message=message
-            # If you want to store subject/message, add fields to SharedReport first
+            # If you want to store subject/message, ensure these fields exist on SharedReport
+            # subject=subject,
+            # message=message
         )
-        print(f"Share request: {subject} - {message}")
+
         if email_sent:
-            return JsonResponse({'success': True, 'message': 'Patient details shared successfully via email.'})
+            return JsonResponse({
+                'success': True,
+                'message': 'Patient details shared successfully via email.'
+            })
         else:
-            return JsonResponse({'success': False, 'error': f'Email could not be sent: {email_error}'}, status=500)
-        
-        # For now, print to console to verify data
-        #return JsonResponse({'success': True, 'message': 'Share recorded successfully.'})
+            return JsonResponse({
+                'success': False,
+                'error': f'Email could not be sent: {email_error}'
+            }, status=500)
 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid JSON.'}, status=400)
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        logger.exception("Unexpected error in share_patient")
+        return JsonResponse({'success': False, 'error': 'An internal error occurred.'}, status=500)
 
 @login_required
 def this_month(request):
